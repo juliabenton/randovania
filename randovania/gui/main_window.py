@@ -89,13 +89,15 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
         from randovania.gui.logic_settings_window import LogicSettingsWindow
         from randovania.gui.cosmetic_window import CosmeticWindow
         from randovania.gui.main_rules import MainRulesWindow
+        from randovania.gui.permalink_window import PermalinkWindow
 
         self.tab_windows = [
             (ISOManagementWindow, "ROM Settings"),
-            (GamePatchesWindow, "Game Patches"),
-            (MainRulesWindow, "Main Rules"),
-            (LogicSettingsWindow, "Logic Settings"),
+            # (GamePatchesWindow, "Game Patches"),
+            # (MainRulesWindow, "Main Rules"),
+            # (LogicSettingsWindow, "Logic Settings"),
             (CosmeticWindow, "Cosmetic"),
+            (PermalinkWindow, "Permalink"),
         ]
 
         for i, tab in enumerate(self.tab_windows):

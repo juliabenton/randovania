@@ -1,9 +1,8 @@
-import random
+import re
 from pathlib import Path
 from typing import Optional, Iterator, Callable
 
 from PySide2.QtCore import Signal
-from PySide2.QtGui import QIntValidator
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 
 from randovania.games.prime.iso_packager import unpack_iso, pack_iso
@@ -15,14 +14,7 @@ from randovania.interface_common import simplified_patcher, game_workdir
 from randovania.interface_common.options import Options
 from randovania.interface_common.status_update_lib import ProgressUpdateCallable
 from randovania.layout.layout_description import LayoutDescription
-from randovania.layout.permalink import Permalink
 from randovania.resolver.exceptions import GenerationFailure
-
-
-def show_failed_generation_exception(exception: GenerationFailure):
-    QMessageBox.critical(None,
-                         "An error occurred while generating a seed",
-                         "{}\n\nSome errors are expected to occur, please try again.".format(exception))
 
 
 class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
@@ -45,7 +37,7 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
 
         # Progress
         background_processor.background_tasks_button_lock_signal.connect(self.enable_buttons_with_background_tasks)
-        self.failed_to_generate_signal.connect(show_failed_generation_exception)
+        self.failed_to_generate_signal.connect(self._show_failed_generation_exception)
 
         # ISO Packing
         self.loaded_game_updated.connect(self._update_displayed_game)
@@ -56,18 +48,8 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
         self.output_folder_edit.textChanged.connect(self._on_new_output_directory)
         self.output_folder_button.clicked.connect(self._change_output_folder)
 
-        # Seed/Permalink
-        self.seed_number_edit.setValidator(QIntValidator(0, 2 ** 31 - 1))
-        self.seed_number_edit.textChanged.connect(self._on_new_seed_number)
-        self.seed_number_button.clicked.connect(self._generate_new_seed_number)
-
-        self.permalink_edit.textChanged.connect(self._on_permalink_changed)
-        self.permalink_import_button.clicked.connect(self._import_permalink_from_field)
-        self.create_spoiler_check.stateChanged.connect(self._persist_option_then_notify("create_spoiler"))
-
-        self.reset_settings_button.clicked.connect(self._reset_settings)
-
         # Randomize
+        self.permalink_help_label.linkActivated.connect(self._on_click_link_to_permalink)
         self.randomize_and_export_button.clicked.connect(self._randomize_and_export)
         self.randomize_log_only_button.clicked.connect(self._create_log_file_pressed)
         self.create_from_log_button.clicked.connect(self._randomize_from_file)
@@ -88,23 +70,8 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
         return persist
 
     def on_options_changed(self, options: Options):
-        seed_number = options.seed_number
-        if seed_number is not None:
-            self.seed_number_edit.setText(str(seed_number))
-        else:
-            self.seed_number_edit.setText("")
-
         output_directory = options.output_directory
         self.output_folder_edit.setText(str(output_directory) if output_directory is not None else "")
-
-        self.create_spoiler_check.setChecked(options.create_spoiler)
-
-        permalink = options.permalink
-        if permalink is not None:
-            self.permalink_edit.setText(permalink.as_str)
-        else:
-            self.permalink_edit.setText("")
-
         self._refresh_randomize_button_state()
 
     # Checks
@@ -206,45 +173,6 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
         self.export_game_button.setEnabled(self._current_lock_state and self._has_game)
         self.clear_game_button.setEnabled(self._current_lock_state and self._has_game)
 
-    # Seed Number / Permalink
-    def _on_new_seed_number(self, value: str):
-        try:
-            seed = int(value)
-        except ValueError:
-            seed = None
-
-        with self._options as options:
-            options.seed_number = seed
-
-    def _generate_new_seed_number(self):
-        self.seed_number_edit.setText(str(random.randint(0, 2 ** 31)))
-
-    def _get_permalink_from_field(self) -> Permalink:
-        return Permalink.from_str(self.permalink_edit.text())
-
-    def _on_permalink_changed(self, value: str):
-        self.permalink_edit.setStyleSheet("")
-        try:
-            self._get_permalink_from_field()
-            # Ignoring return value: we only want to know if it's valid
-        except ValueError:
-            self.permalink_edit.setStyleSheet("border: 1px solid red")
-
-    def _import_permalink_from_field(self):
-        try:
-            permalink = self._get_permalink_from_field()
-            with self._options as options:
-                options.permalink = permalink
-
-        except ValueError as e:
-            QMessageBox.warning(self,
-                                "Invalid permalink",
-                                str(e))
-
-    def _reset_settings(self):
-        with self._options as options:
-            options.reset_to_defaults()
-
     # Randomize
     def _refresh_randomize_button_state(self):
         self.randomize_and_export_button.setEnabled(self._current_lock_state)
@@ -320,3 +248,14 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
             message="Randomizing...",
             layout=layout
         )
+
+    def _on_click_link_to_permalink(self, link: str):
+        m = re.match("randovania://focus-tab/(.*)", link)
+        if m:
+            tab = m.group(1)
+            self.tab_service.focus_tab()
+
+    def _show_failed_generation_exception(self, exception: GenerationFailure):
+        QMessageBox.critical(self,
+                             "An error occurred while generating a seed",
+                             "{}\n\nSome errors are expected to occur, please try again.".format(exception))
