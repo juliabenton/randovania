@@ -3,9 +3,10 @@ import random
 from PySide2.QtGui import QIntValidator
 from PySide2.QtWidgets import QMainWindow, QMessageBox
 
-from randovania.gui.background_task_mixin import BackgroundTaskMixin
-from randovania.gui.permalink_window_ui import Ui_PermalinkWindow
-from randovania.gui.tab_service import TabService
+from randovania.gui.generated.permalink_window_ui import Ui_PermalinkWindow
+from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
+from randovania.gui.lib.tab_service import TabService
+from randovania.gui.options_preset.options_preset_window import OptionsPresetWindow
 from randovania.interface_common.options import Options
 from randovania.layout.permalink import Permalink
 
@@ -17,6 +18,7 @@ class PermalinkWindow(QMainWindow, Ui_PermalinkWindow):
     def __init__(self, tab_service: TabService, background_processor: BackgroundTaskMixin, options: Options):
         super().__init__()
         self.setupUi(self)
+        self.tab_service = tab_service
 
         self._options = options
 
@@ -30,6 +32,9 @@ class PermalinkWindow(QMainWindow, Ui_PermalinkWindow):
         self.create_spoiler_check.stateChanged.connect(self._persist_option_then_notify("create_spoiler"))
 
         self.reset_settings_button.clicked.connect(self._reset_settings)
+
+        # Options preset
+        self.presets_create_button.clicked.connect(self.open_preset_window)
 
     def _persist_option_then_notify(self, attribute_name: str):
         def persist(value: int):
@@ -91,3 +96,8 @@ class PermalinkWindow(QMainWindow, Ui_PermalinkWindow):
     def _reset_settings(self):
         with self._options as options:
             options.reset_to_defaults()
+
+    # Presets
+    def open_preset_window(self):
+        preset_window = OptionsPresetWindow(self.tab_service, self._options)
+        preset_window.show()

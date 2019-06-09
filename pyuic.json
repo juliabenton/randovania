@@ -1,8 +1,8 @@
 {
     "files": [
         [
-            "randovania/gui/*.ui",
-            "randovania/gui"
+            "randovania/gui/templates/*.ui",
+            "randovania/gui/generated"
         ]
     ],
     "hooks": [],

@@ -5,7 +5,7 @@ from functools import partial
 from typing import Dict, Tuple, List, Iterable, Optional
 
 from PySide2.QtCore import QRect, Qt
-from PySide2.QtWidgets import QMainWindow, QLabel, QGroupBox, QGridLayout, QToolButton, QSizePolicy, QDialog, QSpinBox, \
+from PySide2.QtWidgets import QLabel, QGroupBox, QGridLayout, QToolButton, QSizePolicy, QDialog, QSpinBox, \
     QHBoxLayout, QWidget, QCheckBox
 
 from randovania.game_description.default_database import default_prime2_item_database, default_prime2_resource_database
@@ -15,11 +15,9 @@ from randovania.game_description.item.item_database import ItemDatabase
 from randovania.game_description.item.major_item import MajorItem
 from randovania.game_description.resources.resource_type import ResourceType
 from randovania.generator.item_pool.ammo import items_for_ammo
-from randovania.gui.background_task_mixin import BackgroundTaskMixin
+from randovania.gui.generated.options_preset_window_ui import Ui_OptionsPresetWindow
 from randovania.gui.common_qt_lib import set_combo_with_value
 from randovania.gui.item_configuration_popup import ItemConfigurationPopup
-from randovania.gui.main_rules_ui import Ui_MainRules
-from randovania.gui.tab_service import TabService
 from randovania.interface_common.options import Options
 from randovania.layout.layout_configuration import RandomizationMode
 from randovania.layout.ammo_state import AmmoState
@@ -59,20 +57,23 @@ def _update_elements_for_progressive_item(elements: Dict[MajorItem, Iterable[QWi
         element.setVisible(is_progressive)
 
 
-class MainRulesWindow(QMainWindow, Ui_MainRules):
+class ItemPoolTab:
+    parent: QWidget
+    presets_window: Ui_OptionsPresetWindow
+
     _boxes_for_category: Dict[
         ItemCategory, Tuple[QGroupBox, QGridLayout, Dict[MajorItem, Tuple[QToolButton, QLabel]]]]
 
     _ammo_maximum_spinboxes: Dict[int, List[QSpinBox]]
     _ammo_pickup_widgets: Dict[Ammo, AmmoPickupWidgets]
 
-    def __init__(self, tab_service: TabService, background_processor: BackgroundTaskMixin, options: Options):
-        super().__init__()
-        self.setupUi(self)
-
+    def __init__(self, parent: QWidget, presets_window: Ui_OptionsPresetWindow, options: Options):
+        self.parent = parent
+        self.presets_window = presets_window
         self._options = options
+
         size_policy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        self.gridLayout.setAlignment(Qt.AlignTop)
+        self.presets_window.item_pool_grid_layout.setAlignment(Qt.AlignTop)
 
         # Relevant Items
         item_database = default_prime2_item_database()
@@ -104,10 +105,10 @@ class MainRulesWindow(QMainWindow, Ui_MainRules):
         layout = options.layout_configuration
         major_configuration = options.major_items_configuration
 
-        self.progressive_suit_check.setChecked(major_configuration.progressive_suit)
-        self.progressive_grapple_check.setChecked(major_configuration.progressive_grapple)
-        self.progressive_launcher_check.setChecked(major_configuration.progressive_launcher)
-        self.split_ammo_check.setChecked(layout.split_beam_ammo)
+        self.presets_window.progressive_suit_check.setChecked(major_configuration.progressive_suit)
+        self.presets_window.progressive_grapple_check.setChecked(major_configuration.progressive_grapple)
+        self.presets_window.progressive_launcher_check.setChecked(major_configuration.progressive_launcher)
+        self.presets_window.split_ammo_check.setChecked(layout.split_beam_ammo)
 
         _update_elements_for_progressive_item(
             self._boxes_for_category[ItemCategory.SUIT][2],
@@ -138,8 +139,8 @@ class MainRulesWindow(QMainWindow, Ui_MainRules):
         set_combo_with_value(self.randomization_mode_combo, options.randomization_mode)
 
         # Random Starting Items
-        self.minimum_starting_spinbox.setValue(major_configuration.minimum_random_starting_items)
-        self.maximum_starting_spinbox.setValue(major_configuration.maximum_random_starting_items)
+        self.presets_window.minimum_starting_spinbox.setValue(major_configuration.minimum_random_starting_items)
+        self.presets_window.maximum_starting_spinbox.setValue(major_configuration.maximum_random_starting_items)
 
         # Energy Tank
         energy_tank_state = major_configuration.items_state[self._energy_tank_item]
@@ -217,7 +218,7 @@ class MainRulesWindow(QMainWindow, Ui_MainRules):
                 self._ammo_pickup_widgets[ammo][1].setText(str(invalid_config))
 
         # Item pool count
-        self.item_pool_count_label.setText(
+        self.presets_window.item_pool_count_label.setText(
             "Items in pool: {}/119".format(
                 sum(state.num_shuffled_pickups for state in major_configuration.items_state.values())
                 + sum(state.pickup_count for state in ammo_configuration.items_state.values())
@@ -229,20 +230,20 @@ class MainRulesWindow(QMainWindow, Ui_MainRules):
     # Item Alternatives
 
     def _register_alternatives_events(self):
-        self.progressive_suit_check.stateChanged.connect(
+        self.presets_window.progressive_suit_check.stateChanged.connect(
             self._persist_bool_major_configuration_field("progressive_suit"))
-        self.progressive_suit_check.clicked.connect(self._change_progressive_suit)
+        self.presets_window.progressive_suit_check.clicked.connect(self._change_progressive_suit)
 
-        self.progressive_grapple_check.stateChanged.connect(
+        self.presets_window.progressive_grapple_check.stateChanged.connect(
             self._persist_bool_major_configuration_field("progressive_grapple"))
-        self.progressive_grapple_check.clicked.connect(self._change_progressive_grapple)
+        self.presets_window.progressive_grapple_check.clicked.connect(self._change_progressive_grapple)
 
-        self.progressive_launcher_check.stateChanged.connect(
+        self.presets_window.progressive_launcher_check.stateChanged.connect(
             self._persist_bool_major_configuration_field("progressive_launcher"))
-        self.progressive_launcher_check.clicked.connect(self._change_progressive_launcher)
+        self.presets_window.progressive_launcher_check.clicked.connect(self._change_progressive_launcher)
 
-        self.split_ammo_check.stateChanged.connect(self._persist_bool_layout_field("split_beam_ammo"))
-        self.split_ammo_check.clicked.connect(self._change_split_ammo)
+        self.presets_window.split_ammo_check.stateChanged.connect(self._persist_bool_layout_field("split_beam_ammo"))
+        self.presets_window.split_ammo_check.clicked.connect(self._change_split_ammo)
 
     def _persist_bool_layout_field(self, field_name: str):
         def bound(value: int):
@@ -366,8 +367,8 @@ class MainRulesWindow(QMainWindow, Ui_MainRules):
     # Random Starting
 
     def _register_random_starting_events(self):
-        self.minimum_starting_spinbox.valueChanged.connect(self._on_update_minimum_starting)
-        self.maximum_starting_spinbox.valueChanged.connect(self._on_update_maximum_starting)
+        self.presets_window.minimum_starting_spinbox.valueChanged.connect(self._on_update_minimum_starting)
+        self.presets_window.maximum_starting_spinbox.valueChanged.connect(self._on_update_maximum_starting)
 
     def _on_update_minimum_starting(self, value: int):
         with self._options as options:
@@ -389,24 +390,24 @@ class MainRulesWindow(QMainWindow, Ui_MainRules):
             if not major_item_category.is_major_category and major_item_category != ItemCategory.ENERGY_TANK:
                 continue
 
-            category_button = QToolButton(self.major_items_box)
+            category_button = QToolButton(self.presets_window.major_items_box)
             category_button.setGeometry(QRect(20, 30, 24, 21))
             category_button.setText("+")
 
-            category_label = QLabel(self.major_items_box)
+            category_label = QLabel(self.presets_window.major_items_box)
             category_label.setSizePolicy(size_policy)
             category_label.setText(major_item_category.long_name)
 
-            category_box = QGroupBox(self.major_items_box)
+            category_box = QGroupBox(self.presets_window.major_items_box)
             category_box.setSizePolicy(size_policy)
             category_box.setObjectName(f"category_box {major_item_category}")
 
             category_layout = QGridLayout(category_box)
             category_layout.setObjectName(f"category_layout {major_item_category}")
 
-            self.major_items_layout.addWidget(category_button, 2 * current_row + 1, 0, 1, 1)
-            self.major_items_layout.addWidget(category_label, 2 * current_row + 1, 1, 1, 1)
-            self.major_items_layout.addWidget(category_box, 2 * current_row + 2, 0, 1, 2)
+            self.presets_window.major_items_layout.addWidget(category_button, 2 * current_row + 1, 0, 1, 1)
+            self.presets_window.major_items_layout.addWidget(category_label, 2 * current_row + 1, 1, 1, 1)
+            self.presets_window.major_items_layout.addWidget(category_box, 2 * current_row + 2, 0, 1, 2)
             self._boxes_for_category[major_item_category] = category_box, category_layout, {}
 
             category_button.clicked.connect(partial(_toggle_box_visibility, category_button, category_box))
@@ -441,7 +442,7 @@ class MainRulesWindow(QMainWindow, Ui_MainRules):
         """
         major_items_configuration = self._options.major_items_configuration
 
-        popup = ItemConfigurationPopup(self, item, major_items_configuration.items_state[item])
+        popup = ItemConfigurationPopup(self.parent, item, major_items_configuration.items_state[item])
         result = popup.exec_()
 
         if result == QDialog.Accepted:
@@ -509,17 +510,17 @@ class MainRulesWindow(QMainWindow, Ui_MainRules):
             title_layout = QHBoxLayout()
             title_layout.setObjectName(f"{ammo.name} Title Horizontal Layout")
 
-            expand_ammo_button = QToolButton(self.ammo_box)
+            expand_ammo_button = QToolButton(self.presets_window.ammo_box)
             expand_ammo_button.setGeometry(QRect(20, 30, 24, 21))
             expand_ammo_button.setText("+")
             title_layout.addWidget(expand_ammo_button)
 
-            category_label = QLabel(self.ammo_box)
+            category_label = QLabel(self.presets_window.ammo_box)
             category_label.setSizePolicy(size_policy)
             category_label.setText(ammo.name + "s")
             title_layout.addWidget(category_label)
 
-            pickup_box = QGroupBox(self.ammo_box)
+            pickup_box = QGroupBox(self.presets_window.ammo_box)
             pickup_box.setSizePolicy(size_policy)
             layout = QGridLayout(pickup_box)
             layout.setObjectName(f"{ammo.name} Box Layout")
@@ -575,8 +576,8 @@ class MainRulesWindow(QMainWindow, Ui_MainRules):
             expand_ammo_button.clicked.connect(partial(_toggle_box_visibility, expand_ammo_button, pickup_box))
             pickup_box.setVisible(False)
 
-            self.ammo_layout.addLayout(title_layout)
-            self.ammo_layout.addWidget(pickup_box)
+            self.presets_window.ammo_layout.addLayout(title_layout)
+            self.presets_window.ammo_layout.addWidget(pickup_box)
 
     def _on_update_ammo_maximum_spinbox(self, ammo_int: int, value: int):
         with self._options as options:

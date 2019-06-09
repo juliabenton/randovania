@@ -1,0 +1,942 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>OptionsPresetWindow</class>
+ <widget class="QMainWindow" name="OptionsPresetWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>530</width>
+    <height>460</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Options Preset</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_5">
+    <item>
+     <widget class="QTabWidget" name="tab_widget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="details_tab">
+       <attribute name="title">
+        <string>Preset Details</string>
+       </attribute>
+       <layout class="QGridLayout" name="details_layout">
+        <item row="1" column="0">
+         <widget class="QLabel" name="preset_reference_label">
+          <property name="text">
+           <string>Reference Preset</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="preset_description_label">
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="preset_title_edit"/>
+        </item>
+        <item row="3" column="0" colspan="3">
+         <widget class="QTextEdit" name="preset_description_edit"/>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="preset_title_label">
+          <property name="text">
+           <string>Title</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="preset_reference_value_label">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="item_pool_tab">
+       <attribute name="title">
+        <string>Item Pool</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="item_pool_layout">
+        <item>
+         <widget class="QScrollArea" name="scroll_area">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <widget class="QWidget" name="scroll_area_contents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>502</width>
+             <height>377</height>
+            </rect>
+           </property>
+           <layout class="QGridLayout" name="item_pool_grid_layout">
+            <item row="0" column="0" colspan="2">
+             <widget class="QGroupBox" name="item_alternative_box">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="title">
+               <string>Item Alternatives</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <widget class="QCheckBox" name="progressive_suit_check">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Instead of there being a Dark Suit and a Light Suit pickups, there will instead be two Progressive Suit pickups.&lt;/p&gt;&lt;p&gt;Picking the first one gives you Dark Suit, while the second one gives Light Suit. This ensures you always get Dark Suit before.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Use progressive Dark Suit → Light Suit</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="progressive_grapple_check">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This groups Grapple Beam and Screw Attack into a progressive item pair: the first one always gives Grapple Beam, with the second one always being Screw Attack.&lt;/p&gt;&lt;p&gt;Warning: the model for this item pair will always be Grapple Beam.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Use progressive Grapple Beam → Screw Attack</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="progressive_launcher_check">
+                 <property name="text">
+                  <string>Use progressive Missile Launcher → Seekers Launcher</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="split_ammo_check">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Splits the Beam Ammo Expansion pickups into two different pickups: Light Ammo Expansion and Dark Ammo Expansion.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Split Beam Ammo Expansions</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <widget class="QGroupBox" name="random_starting_box">
+              <property name="title">
+               <string>Random Starting Items</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_3">
+               <item row="2" column="0">
+                <widget class="QLabel" name="maximum_starting_label">
+                 <property name="text">
+                  <string>Maximum</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="minimum_starting_label">
+                 <property name="text">
+                  <string>Minimum</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QSpinBox" name="minimum_starting_spinbox">
+                 <property name="maximum">
+                  <number>30</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="2">
+                <widget class="QLabel" name="random_starting_label">
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Randovania will add additional starting items if necessary to make the seed possible.&lt;br/&gt;You can enforce at least some items by increasing the minimum.&lt;br/&gt;The maximum causes the seed to fail instead of adding additional items.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QSpinBox" name="maximum_starting_spinbox">
+                 <property name="maximum">
+                  <number>30</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="2">
+             <widget class="QGroupBox" name="item_pool_box">
+              <property name="toolTipDuration">
+               <number>-1</number>
+              </property>
+              <property name="title">
+               <string>Item Pool</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_4">
+               <item row="1" column="1">
+                <widget class="QGroupBox" name="ammo_box">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="title">
+                  <string>Ammo</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                 </property>
+                 <layout class="QVBoxLayout" name="ammo_layout">
+                  <property name="sizeConstraint">
+                   <enum>QLayout::SetMinimumSize</enum>
+                  </property>
+                 </layout>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QGroupBox" name="major_items_box">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="title">
+                  <string>Major Items</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                 </property>
+                 <layout class="QGridLayout" name="major_items_layout">
+                  <property name="sizeConstraint">
+                   <enum>QLayout::SetMinimumSize</enum>
+                  </property>
+                 </layout>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="2">
+                <widget class="QLabel" name="item_pool_count_label">
+                 <property name="toolTip">
+                  <string>If there are fewer than 119 items, the rest of the item locations will contain Energy Transfer Modules.</string>
+                 </property>
+                 <property name="text">
+                  <string>Items in pool: #/119</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="trick_level_tab">
+       <attribute name="title">
+        <string>Trick Level</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="trick_level_top_layout">
+        <item>
+         <widget class="QScrollArea" name="trick_level_scroll">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="trick_level_scroll_contents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>502</width>
+             <height>377</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="trick_level_layout">
+            <item>
+             <widget class="QLabel" name="logic_description_label">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;There are logic rules in place which prevent you from being locked out of progression and guaranteeing that you’ll be able to finish the game every time regardless of the distribution of items. More advanced trick levels assumes more knowledge of how the game works and ability to abuse game mechanics.&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;No matter the level, it is always possible to softlock when you enter a room or area that you're unable to leave. For example, vanilla beam rooms without the necessary beam to escape, Dark World without Light Beam/Anihhilator Beam, Torvus Bog without Super Missile.&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;However, it may be &lt;span style=&quot; font-style:italic;&quot;&gt;necessary&lt;/span&gt; to enter Dark World without a way to escape if that item is located in the Dark World.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="logic_combo_box">
+              <item>
+               <property name="text">
+                <string>No Tricks</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Trivial</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Easy</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Normal</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Hard</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Hypermode</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Minimal Checking</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="logic_level_label">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;This mode requires no knowledge about the game, nor does it require any abuse of game mechanics, making it ideal for casual and first time players.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="Line" name="trick_level_line">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="trick_level_help_label">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you want to control the expected level of a specific trick, select the trick below and then move the slider to the level you want.&lt;/p&gt;&lt;p&gt;Configuring a trick's difficulty to above to global difficulty above &lt;span style=&quot; font-weight:600;&quot;&gt;has no effect&lt;/span&gt;.&lt;/p&gt;&lt;p&gt;Press the ? button to see which rooms use that trick on the selected level.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="elevator_tab">
+       <attribute name="title">
+        <string>Elevators</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="elevator_layout">
+        <item>
+         <widget class="QLabel" name="elevators_description_label">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls what each elevator connects to.&lt;/p&gt;&lt;p&gt;Two-way: after taking an elevator, the elevator in the room you're left brings you to where you where.&lt;br/&gt;Between Areas: An elevator will never connect to another in the same area.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="elevators_combo">
+          <item>
+           <property name="text">
+            <string>Original Connections</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Random: Two-way, between areas</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="goal_tab">
+       <attribute name="title">
+        <string>Goal</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="goal_layout">
+        <item>
+         <widget class="QLabel" name="skytemple_description">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls where the Sky Temple Keys will be located.&lt;/p&gt;&lt;p&gt;All Guardians and Sub-Guardians: One key will be placed in each of the guardians and sub-guardians.&lt;br/&gt;Guardians: One key will be placed as the reward of each of the guardians.&lt;br/&gt;Collect Sky Temple Keys: A configurable quantity will be shuffled over the game world.&lt;/p&gt;&lt;p&gt;The Guardians are: Amorbis, Chykka and Quadraxis.&lt;br/&gt;The Sub-Guardians are: Bomb Guardian, Jump Guardian, Boost Guardian, Grapple Guardian, Spider Guardian and Power Bomb Guardian.&lt;/p&gt;&lt;p&gt;You can always check Sky Temple Gateway for hints where the keys were placed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="skytemple_combo">
+          <item>
+           <property name="text">
+            <string>Guardians and Sub-Guardians</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Guardians</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Collect Sky Temple Keys</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="skytemple_slider_layout">
+          <item>
+           <widget class="QSlider" name="skytemple_slider">
+            <property name="maximum">
+             <number>9</number>
+            </property>
+            <property name="pageStep">
+             <number>2</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksBelow</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="skytemple_slider_label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>20</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="starting_area_tab">
+       <attribute name="title">
+        <string>Starting Area</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="starting_area_layout">
+        <item>
+         <widget class="QLabel" name="startingarea_description">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the area where the game will start at.&lt;/p&gt;&lt;p&gt;Ship: Samus' Ship at Temple Grounds - Landing Site. The vanilla location.&lt;br/&gt;Random Save Station: a random Save Station of the game will be chosen.&lt;br/&gt;Specific Area: A user provided choice. The specific location on the area depends on each one.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;WARNING&lt;/span&gt;: depending on the starting items that are configured, it may be impossible to start at the chosen place. In that case, the generation will fail.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="startingarea_combo">
+          <item>
+           <property name="text">
+            <string>Ship</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Random Save Station</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Specific Area (Choose Below)</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="specific_starting_layout">
+          <item>
+           <widget class="QComboBox" name="specific_starting_world_combo">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="specific_starting_area_combo">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="translators_tab">
+       <attribute name="title">
+        <string>Translator Gates</string>
+       </attribute>
+       <layout class="QGridLayout" name="translators_top_layout">
+        <item row="0" column="1">
+         <widget class="QScrollArea" name="translators_scroll">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <widget class="QWidget" name="translators_scroll_contents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>502</width>
+             <height>377</height>
+            </rect>
+           </property>
+           <layout class="QGridLayout" name="translators_layout">
+            <item row="0" column="0" colspan="3">
+             <widget class="QLabel" name="translators_description">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change which translator is required for all the gates in the game. Their colors are changed to match the necessary translator.&lt;/p&gt;&lt;p&gt;There are two vanilla options: using the actual translator requirements in the game, and using the vanilla gate colors.&lt;br/&gt;This is because in the original game, some translator gates are colored one way, but the translator requirement is something else.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;Some translator gates appears only after some event is triggered in game. The following options change them so they're always there. The Great Temple has a special case: if you enter Great Temple via Transport A, the Emerald gate will be permanently down.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="always_up_gfmc_compound_check">
+              <property name="text">
+               <string>GFMC Compound</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="always_up_torvus_temple_check">
+              <property name="text">
+               <string>Torvus Temple</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QCheckBox" name="always_up_great_temple_check">
+              <property name="text">
+               <string>Great Temple (Emerald)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QPushButton" name="translator_randomize_all_button">
+              <property name="text">
+               <string>Randomize All</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QPushButton" name="translator_vanilla_actual_button">
+              <property name="text">
+               <string>Vanilla (Actual)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QPushButton" name="translator_vanilla_colors_button">
+              <property name="text">
+               <string>Vanilla (Colors)</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="hint_tab">
+       <attribute name="title">
+        <string>Hints</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="hint_layout">
+        <item>
+         <widget class="QLabel" name="hint_sky_temple_key_label">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls how precise the hints for Sky Temple Keys in Sky Temple Gateway are.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;No hints&lt;/span&gt;: The scans provide no useful information.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Show only the area name&lt;/span&gt;: The scans will say the key is in &amp;quot;Temple Grounds&amp;quot;, &amp;quot;Agon Wastes&amp;quot;, etc.&lt;br/&gt;There is no difference between Aether and Dark Aether. So Agon Wastes means both light and dark world.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Show area and room name&lt;/span&gt;: The scans will say the key is in &amp;quot;Great Temple - Transport A Access&amp;quot;, etc. For rooms with more than one item, there's no way to distinguish which one it is.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="hint_sky_temple_key_combo">
+          <item>
+           <property name="text">
+            <string>No hints</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Show only the area name</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Show area and room name</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="game_patches_tab">
+       <attribute name="title">
+        <string>Game Patches</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="game_patches_layout">
+        <item>
+         <widget class="QCheckBox" name="include_menu_mod_check">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Include Menu Mod</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="include_menu_mod_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Menu Mod is a pratice tool for Echoes, allowing in-game changes to which items you have and warping to all rooms.&lt;/p&gt;&lt;p&gt;See the &lt;a href=&quot;https://www.dropbox.com/s/yhqqafaxfo3l4vn/Echoes%20Menu.7z?file_subpath=%2FEchoes+Menu%2Freadme.txt&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Menu Mod README&lt;/span&gt;&lt;/a&gt; for more details.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="openExternalLinks">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="warp_to_start_check">
+          <property name="text">
+           <string>Add warping to starting location to save stations</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="warp_to_start_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Refusing to save at any Save Station will prompt if you want to warp to the starting location (usually Samus' Ship).&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#005500;&quot;&gt;Usage of the this option is encouraged for all, as it prevents many softlocks that occurs normally in Echoes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="dark_aether_box">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Dark Aether damage</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="varia_suit_spin_box">
+             <property name="suffix">
+              <string> energy/s</string>
+             </property>
+             <property name="maximum">
+              <double>60.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+             <property name="value">
+              <double>6.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="varia_suit_label">
+             <property name="text">
+              <string>Varia Suit</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="dark_suit_label">
+             <property name="text">
+              <string>Dark Suit</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QDoubleSpinBox" name="dark_suit_spin_box">
+             <property name="suffix">
+              <string> energy/s</string>
+             </property>
+             <property name="maximum">
+              <double>60.000000000000000</double>
+             </property>
+             <property name="stepType">
+              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+             </property>
+             <property name="value">
+              <double>1.200000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="dark_aether_label">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Configure how much damage per second you take in Dark Aether, per suit.&lt;br/&gt;Light Suit is always imune.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="wordWrap">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="pickup_style_box">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Pickup style</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QComboBox" name="pickup_model_combo">
+             <item>
+              <property name="text">
+               <string>Use correct item model, scan and name</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Use correct scan and name, hide the model</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Use correct name, hide the model and scan</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Hide the model, scan and name</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="pickup_data_source_label">
+             <property name="text">
+              <string>When hiding some part of the pickup, it's replaced with:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="pickup_data_source_combo">
+             <item>
+              <property name="text">
+               <string>Energy Transfer Module's data</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>A random item data</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>The data of the pickup in that place</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QDialogButtonBox" name="button_box">
+      <property name="standardButtons">
+       <set>QDialogButtonBox::Close|QDialogButtonBox::Reset|QDialogButtonBox::Save</set>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>530</width>
+     <height>17</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

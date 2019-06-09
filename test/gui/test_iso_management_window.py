@@ -4,9 +4,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PySide2 import QtCore
 
-from randovania.gui.background_task_mixin import BackgroundTaskMixin
+from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
 from randovania.gui.iso_management_window import ISOManagementWindow
-from randovania.gui.tab_service import TabService
+from randovania.gui.lib.tab_service import TabService
 from randovania.interface_common import simplified_patcher
 from randovania.interface_common.options import Options
 

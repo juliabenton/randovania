@@ -8,7 +8,7 @@ from PySide2.QtWidgets import QMainWindow, QRadioButton, QGroupBox, QHBoxLayout,
 from randovania.game_description.default_database import default_prime2_game_description
 from randovania.game_description.node import PickupNode
 from randovania.gui.common_qt_lib import set_default_window_icon
-from randovania.gui.seed_details_window_ui import Ui_SeedDetailsWindow
+from randovania.gui.generated.seed_details_window_ui import Ui_SeedDetailsWindow
 from randovania.layout.layout_description import LayoutDescription
 
 

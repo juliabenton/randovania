@@ -6,10 +6,10 @@ from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 
 from randovania.games.prime.iso_packager import unpack_iso, pack_iso
-from randovania.gui.background_task_mixin import BackgroundTaskMixin
+from randovania.gui.generated.iso_management_window_ui import Ui_ISOManagementWindow
+from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
 from randovania.gui.common_qt_lib import prompt_user_for_input_iso, prompt_user_for_seed_log
-from randovania.gui.iso_management_window_ui import Ui_ISOManagementWindow
-from randovania.gui.tab_service import TabService
+from randovania.gui.lib.tab_service import TabService
 from randovania.interface_common import simplified_patcher, game_workdir
 from randovania.interface_common.options import Options
 from randovania.interface_common.status_update_lib import ProgressUpdateCallable

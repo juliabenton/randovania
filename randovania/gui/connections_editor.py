@@ -5,8 +5,8 @@ from PySide2.QtWidgets import QDialog, QWidget
 from randovania.game_description.requirements import RequirementSet
 from randovania.game_description.resources.resource_database import ResourceDatabase
 from randovania.gui.common_qt_lib import set_default_window_icon
-from randovania.gui.connections_editor_ui import Ui_ConnectionEditor
-from randovania.gui.connections_visualizer import ConnectionsVisualizer
+from randovania.gui.generated.connections_editor_ui import Ui_ConnectionEditor
+from randovania.gui.lib.connections_visualizer import ConnectionsVisualizer
 
 
 class ConnectionsEditor(QDialog, Ui_ConnectionEditor):

@@ -14,13 +14,13 @@ from randovania import VERSION
 from randovania.game_description import default_database
 from randovania.game_description.node import LogbookNode, LoreType
 from randovania.games.prime import default_data
-from randovania.gui.background_task_mixin import BackgroundTaskMixin
+from randovania.gui.generated.main_window_ui import Ui_MainWindow
+from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
 from randovania.gui.common_qt_lib import prompt_user_for_seed_log, prompt_user_for_database_file, \
     set_default_window_icon
 from randovania.gui.data_editor import DataEditorWindow
-from randovania.gui.mainwindow_ui import Ui_MainWindow
 from randovania.gui.seed_details_window import SeedDetailsWindow
-from randovania.gui.tab_service import TabService
+from randovania.gui.lib.tab_service import TabService
 from randovania.gui.tracker_window import TrackerWindow, InvalidLayoutForTracker
 from randovania.interface_common import github_releases_data, update_checker
 from randovania.interface_common.options import Options
@@ -84,12 +84,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
         _translate = QtCore.QCoreApplication.translate
         self.tabs = []
 
-        from randovania.gui.game_patches_window import GamePatchesWindow
         from randovania.gui.iso_management_window import ISOManagementWindow
-        from randovania.gui.logic_settings_window import LogicSettingsWindow
         from randovania.gui.cosmetic_window import CosmeticWindow
-        from randovania.gui.main_rules import MainRulesWindow
         from randovania.gui.permalink_window import PermalinkWindow
+
+        # from randovania.gui.game_patches_window import GamePatchesWindow
+        # from randovania.gui.logic_settings_window import LogicSettingsWindow
+        # from randovania.gui.main_rules import MainRulesWindow
 
         self.tab_windows = [
             (ISOManagementWindow, "ROM Settings"),

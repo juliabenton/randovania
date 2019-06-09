@@ -1,8 +1,8 @@
 from PySide2.QtWidgets import QMainWindow
 
-from randovania.gui.background_task_mixin import BackgroundTaskMixin
-from randovania.gui.cosmetic_window_ui import Ui_CosmeticWindow
-from randovania.gui.tab_service import TabService
+from randovania.gui.generated.cosmetic_window_ui import Ui_CosmeticWindow
+from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
+from randovania.gui.lib.tab_service import TabService
 from randovania.interface_common.options import Options
 
 
