@@ -14,18 +14,18 @@ from randovania import VERSION
 from randovania.game_description import default_database
 from randovania.game_description.node import LogbookNode, LoreType
 from randovania.games.prime import default_data
-from randovania.gui.generated.main_window_ui import Ui_MainWindow
-from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
 from randovania.gui.common_qt_lib import prompt_user_for_seed_log, prompt_user_for_database_file, \
     set_default_window_icon
 from randovania.gui.data_editor import DataEditorWindow
-from randovania.gui.seed_details_window import SeedDetailsWindow
+from randovania.gui.generated.main_window_ui import Ui_MainWindow
+from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
 from randovania.gui.lib.tab_service import TabService
+from randovania.gui.seed_details_window import SeedDetailsWindow
 from randovania.gui.tracker_window import TrackerWindow, InvalidLayoutForTracker
 from randovania.interface_common import github_releases_data, update_checker
-from randovania.interface_common.options import Options
+from randovania.interface_common.data_paths import get_default_paths
+from randovania.interface_common.user_preferences import UserPreferences
 from randovania.resolver import debug
-
 
 _DISABLE_VALIDATION_WARNING = """
 <html><head/><body>
@@ -37,19 +37,19 @@ Do <span style=" font-weight:600;">not</span> disable if you're uncomfortable wi
 
 class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
     newer_version_signal = Signal(str, str)
-    options_changed_signal = Signal()
+    preferences_changed_signal = Signal()
     is_preview_mode: bool = False
 
     menu_new_version: Optional[QAction] = None
+    user_preferences: UserPreferences
     _current_version_url: Optional[str] = None
-    _options: Options
     _data_visualizer: Optional[DataEditorWindow] = None
 
     @property
     def _tab_widget(self):
         return self.tabWidget
 
-    def __init__(self, options: Options, preview: bool):
+    def __init__(self, preview: bool):
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle("Randovania {}".format(VERSION))
@@ -67,7 +67,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
         self.background_tasks_button_lock_signal.connect(self.enable_buttons_with_background_tasks)
         self.progress_update_signal.connect(self.update_progress)
         self.stop_background_process_button.clicked.connect(self.stop_background_process)
-        self.options_changed_signal.connect(self.on_options_changed)
+        self.preferences_changed_signal.connect(self.on_preferences_changed)
 
         # Menu Bar
         self.menu_action_data_visualizer.triggered.connect(self._open_data_visualizer)
@@ -88,29 +88,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
         from randovania.gui.cosmetic_window import CosmeticWindow
         from randovania.gui.permalink_window import PermalinkWindow
 
-        # from randovania.gui.game_patches_window import GamePatchesWindow
-        # from randovania.gui.logic_settings_window import LogicSettingsWindow
-        # from randovania.gui.main_rules import MainRulesWindow
-
         self.tab_windows = [
             (ISOManagementWindow, "ROM Settings"),
-            # (GamePatchesWindow, "Game Patches"),
-            # (MainRulesWindow, "Main Rules"),
-            # (LogicSettingsWindow, "Logic Settings"),
             (CosmeticWindow, "Cosmetic"),
             (PermalinkWindow, "Permalink"),
         ]
 
         for i, tab in enumerate(self.tab_windows):
-            self.windows.append(tab[0](self, self, options))
+            self.windows.append(tab[0](self, self))
             self.tabs.append(self.windows[i].centralWidget)
             self.tabWidget.insertTab(i + 1, self.tabs[i], _translate("MainWindow", tab[1]))
-
-        # Setting this event only now, so all options changed trigger only once
-        options.on_options_changed = self.options_changed_signal.emit
-        self._options = options
-        with options:
-            self.on_options_changed()
 
         self.tabWidget.setCurrentIndex(0)
 
@@ -146,7 +133,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
     def _on_releases_data(self, task: asyncio.Task):
         releases = task.result()
         current_version = update_checker.strict_current_version()
-        last_changelog = self._options.last_changelog_displayed
+        last_changelog = self.user_preferences.last_changelog_displayed
 
         all_change_logs, new_change_logs, version_to_display = update_checker.versions_to_display_for_releases(
             current_version, last_changelog, releases)
@@ -177,8 +164,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
 
         if new_change_logs:
             QMessageBox.information(self, "What's new", markdown.markdown("\n".join(new_change_logs)))
-            with self._options as options:
-                options.last_changelog_displayed = current_version
+            with self.user_preferences as user_preferences:
+                user_preferences.last_changelog_displayed = current_version
 
     def display_new_version(self, version: update_checker.VersionDescription):
         if self.menu_new_version is None:
@@ -196,13 +183,20 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
         QDesktopServices.openUrl(QUrl(self._current_version_url))
 
     # Options
-    def on_options_changed(self):
-        for window in self.windows:
-            window.on_options_changed(self._options)
+    def load_persisted_data(self):
+        self.user_preferences = UserPreferences()
 
-        self.menu_action_validate_seed_after.setChecked(self._options.advanced_validate_seed_after)
+        self.user_preferences.on_changes = self.preferences_changed_signal.emit
+        with self.user_preferences:
+            self.on_preferences_changed()
+
+    def on_preferences_changed(self):
+        for window in self.windows:
+            window.user_preferences = self.user_preferences
+
+        self.menu_action_validate_seed_after.setChecked(self.user_preferences.advanced_validate_seed_after)
         self.menu_action_timeout_generation_after_a_time_limit.setChecked(
-            self._options.advanced_timeout_during_generation)
+            self.user_preferences.advanced_timeout_during_generation)
 
     # Menu Actions
     def _open_data_visualizer(self):
@@ -245,7 +239,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
 
     def _open_tracker(self):
         try:
-            self._tracker = TrackerWindow(self._options.tracker_files_path, self._options.layout_configuration)
+            self._tracker = TrackerWindow(get_default_paths().tracker_files_path,
+                                          self._options.layout_configuration)
         except InvalidLayoutForTracker as e:
             QMessageBox.critical(
                 self,
@@ -260,7 +255,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
         pass
 
     def _on_validate_seed_change(self):
-        old_value = self._options.advanced_validate_seed_after
+        old_value = self.user_preferences.advanced_validate_seed_after
         new_value = self.menu_action_validate_seed_after.isChecked()
 
         if old_value and not new_value:
@@ -275,13 +270,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
                 self.menu_action_validate_seed_after.setChecked(True)
                 return
 
-        with self._options as options:
-            options.advanced_validate_seed_after = new_value
+        with self.user_preferences as user_preferences:
+            user_preferences.advanced_validate_seed_after = new_value
 
     def _on_generate_time_limit_change(self):
         is_checked = self.menu_action_timeout_generation_after_a_time_limit.isChecked()
-        with self._options as options:
-            options.advanced_timeout_during_generation = is_checked
+        with self.user_preferences as user_preferences:
+            user_preferences.advanced_timeout_during_generation = is_checked
 
     def _update_hints_text(self):
         game_description = default_database.default_prime2_game_description()

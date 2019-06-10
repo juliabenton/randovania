@@ -7,10 +7,7 @@ from typing import Optional, TypeVar, Callable, Any
 from randovania.interface_common import persistence, update_checker
 from randovania.interface_common.cosmetic_patches import CosmeticPatches
 from randovania.interface_common.persisted_options import get_persisted_options_from_data, serialized_data_for_options
-from randovania.layout.ammo_configuration import AmmoConfiguration
-from randovania.layout.layout_configuration import LayoutConfiguration, LayoutElevators, \
-    LayoutSkyTempleKeyMode, RandomizationMode
-from randovania.layout.major_items_configuration import MajorItemsConfiguration
+from randovania.layout.layout_configuration import LayoutConfiguration
 from randovania.layout.patcher_configuration import PatcherConfiguration
 from randovania.layout.permalink import Permalink
 
@@ -277,128 +274,6 @@ class Options:
         self._create_spoiler = value.spoiler
         self._patcher_configuration = value.patcher_configuration
         self._layout_configuration = value.layout_configuration
-
-    # Access to fields inside PatcherConfiguration
-    @property
-    def include_menu_mod(self) -> bool:
-        return self.patcher_configuration.menu_mod
-
-    @include_menu_mod.setter
-    def include_menu_mod(self, value: bool):
-        self.set_patcher_configuration_field("menu_mod", value)
-
-    @property
-    def warp_to_start(self) -> bool:
-        return self.patcher_configuration.warp_to_start
-
-    @warp_to_start.setter
-    def warp_to_start(self, value: bool):
-        self.set_patcher_configuration_field("warp_to_start", value)
-
-    @property
-    def pickup_model_style(self):
-        return self.patcher_configuration.pickup_model_style
-
-    @pickup_model_style.setter
-    def pickup_model_style(self, value):
-        self.set_patcher_configuration_field("pickup_model_style", value)
-
-    @property
-    def pickup_model_data_source(self):
-        return self.patcher_configuration.pickup_model_data_source
-
-    @pickup_model_data_source.setter
-    def pickup_model_data_source(self, value):
-        self.set_patcher_configuration_field("pickup_model_data_source", value)
-
-    def set_patcher_configuration_field(self, field_name: str, value):
-        self._edit_field("patcher_configuration",
-                         dataclasses.replace(self.patcher_configuration, **{field_name: value}))
-
-    # Access to fields inside CosmeticPatches
-    @property
-    def hud_memo_popup_removal(self) -> bool:
-        return self.cosmetic_patches.disable_hud_popup
-
-    @hud_memo_popup_removal.setter
-    def hud_memo_popup_removal(self, value: bool):
-        self._edit_field("cosmetic_patches",
-                         dataclasses.replace(self.cosmetic_patches, disable_hud_popup=value))
-
-    @property
-    def speed_up_credits(self) -> bool:
-        return self.cosmetic_patches.speed_up_credits
-
-    @speed_up_credits.setter
-    def speed_up_credits(self, value: bool):
-        self._edit_field("cosmetic_patches",
-                         dataclasses.replace(self.cosmetic_patches, speed_up_credits=value))
-
-    @property
-    def open_map(self) -> bool:
-        return self.cosmetic_patches.open_map
-
-    @open_map.setter
-    def open_map(self, value: bool):
-        self._edit_field("cosmetic_patches",
-                         dataclasses.replace(self.cosmetic_patches, open_map=value))
-
-    @property
-    def pickup_markers(self) -> bool:
-        return self.cosmetic_patches.pickup_markers
-
-    @pickup_markers.setter
-    def pickup_markers(self, value: bool):
-        self._edit_field("cosmetic_patches",
-                         dataclasses.replace(self.cosmetic_patches, pickup_markers=value))
-
-    # Access to fields inside LayoutConfiguration
-
-    @property
-    def layout_configuration_sky_temple_keys(self) -> LayoutSkyTempleKeyMode:
-        return self.layout_configuration.sky_temple_keys
-
-    @layout_configuration_sky_temple_keys.setter
-    def layout_configuration_sky_temple_keys(self, value: LayoutSkyTempleKeyMode):
-        self.set_layout_configuration_field("sky_temple_keys", value)
-
-    @property
-    def layout_configuration_elevators(self) -> LayoutElevators:
-        return self.layout_configuration.elevators
-
-    @layout_configuration_elevators.setter
-    def layout_configuration_elevators(self, value: LayoutElevators):
-        self.set_layout_configuration_field("elevators", value)
-
-    @property
-    def randomization_mode(self) -> RandomizationMode:
-        return self.layout_configuration.randomization_mode
-
-    @randomization_mode.setter
-    def randomization_mode(self, value: RandomizationMode):
-        self.set_layout_configuration_field("randomization_mode", value)
-
-    @property
-    def major_items_configuration(self) -> MajorItemsConfiguration:
-        return self.layout_configuration.major_items_configuration
-
-    @major_items_configuration.setter
-    def major_items_configuration(self, value: MajorItemsConfiguration):
-        self.set_layout_configuration_field("major_items_configuration", value)
-
-    @property
-    def ammo_configuration(self) -> AmmoConfiguration:
-        return self.layout_configuration.ammo_configuration
-
-    @ammo_configuration.setter
-    def ammo_configuration(self, value: AmmoConfiguration):
-        self.set_layout_configuration_field("ammo_configuration", value)
-
-    def set_layout_configuration_field(self, field_name: str, value):
-        self._edit_field(
-            "layout_configuration",
-            dataclasses.replace(self.layout_configuration, **{field_name: value})
-        )
 
     ######
 

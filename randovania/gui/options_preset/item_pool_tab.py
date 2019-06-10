@@ -15,13 +15,16 @@ from randovania.game_description.item.item_database import ItemDatabase
 from randovania.game_description.item.major_item import MajorItem
 from randovania.game_description.resources.resource_type import ResourceType
 from randovania.generator.item_pool.ammo import items_for_ammo
-from randovania.gui.generated.options_preset_window_ui import Ui_OptionsPresetWindow
 from randovania.gui.common_qt_lib import set_combo_with_value
 from randovania.gui.item_configuration_popup import ItemConfigurationPopup
-from randovania.interface_common.options import Options
+from randovania.gui.options_preset.options_preset_base_tab import OptionsPresetBaseTab
+from randovania.gui.options_preset.options_preset_editor import OptionsPresetEditor
+from randovania.interface_common.options_preset import OptionsPreset
+from randovania.layout.ammo_configuration import AmmoConfiguration
 from randovania.layout.layout_configuration import RandomizationMode
 from randovania.layout.ammo_state import AmmoState
 from randovania.layout.major_item_state import ENERGY_TANK_MAXIMUM_COUNT, MajorItemState, DEFAULT_MAXIMUM_SHUFFLED
+from randovania.layout.major_items_configuration import MajorItemsConfiguration
 from randovania.resolver.exceptions import InvalidConfiguration
 
 _EXPECTED_COUNT_TEXT_TEMPLATE = ("Each expansion will provide, on average, {per_expansion}, for a total of {total}."
@@ -57,9 +60,8 @@ def _update_elements_for_progressive_item(elements: Dict[MajorItem, Iterable[QWi
         element.setVisible(is_progressive)
 
 
-class ItemPoolTab:
-    parent: QWidget
-    presets_window: Ui_OptionsPresetWindow
+class ItemPoolTab(OptionsPresetBaseTab):
+    editor: OptionsPresetEditor
 
     _boxes_for_category: Dict[
         ItemCategory, Tuple[QGroupBox, QGridLayout, Dict[MajorItem, Tuple[QToolButton, QLabel]]]]
@@ -67,13 +69,11 @@ class ItemPoolTab:
     _ammo_maximum_spinboxes: Dict[int, List[QSpinBox]]
     _ammo_pickup_widgets: Dict[Ammo, AmmoPickupWidgets]
 
-    def __init__(self, parent: QWidget, presets_window: Ui_OptionsPresetWindow, options: Options):
-        self.parent = parent
-        self.presets_window = presets_window
-        self._options = options
+    def __init__(self, editor: OptionsPresetEditor):
+        self.editor = editor
 
         size_policy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        self.presets_window.item_pool_grid_layout.setAlignment(Qt.AlignTop)
+        self.editor.item_pool_grid_layout.setAlignment(Qt.AlignTop)
 
         # Relevant Items
         item_database = default_prime2_item_database()
@@ -100,15 +100,31 @@ class ItemPoolTab:
         self._create_energy_tank_box()
         self._create_ammo_pickup_boxes(size_policy, item_database)
 
-    def on_options_changed(self, options: Options):
-        # Item alternatives
-        layout = options.layout_configuration
-        major_configuration = options.major_items_configuration
+    @property
+    def major_items_configuration(self) -> MajorItemsConfiguration:
+        return self.editor.layout_configuration.major_items_configuration
 
-        self.presets_window.progressive_suit_check.setChecked(major_configuration.progressive_suit)
-        self.presets_window.progressive_grapple_check.setChecked(major_configuration.progressive_grapple)
-        self.presets_window.progressive_launcher_check.setChecked(major_configuration.progressive_launcher)
-        self.presets_window.split_ammo_check.setChecked(layout.split_beam_ammo)
+    def set_major_items_configuration(self, configuration: MajorItemsConfiguration):
+        with self.editor as editor:
+            editor.set_layout_field("major_items_configuration", configuration)
+
+    @property
+    def ammo_configuration(self) -> AmmoConfiguration:
+        return self.editor.layout_configuration.ammo_configuration
+
+    def set_ammo_configuration(self, configuration: AmmoConfiguration):
+        with self.editor as editor:
+            editor.set_layout_field("ammo_configuration", configuration)
+
+    def on_preset_changed(self, preset: OptionsPreset):
+        # Item alternatives
+        layout = preset.layout
+        major_configuration = layout.major_items_configuration
+
+        self.editor.progressive_suit_check.setChecked(major_configuration.progressive_suit)
+        self.editor.progressive_grapple_check.setChecked(major_configuration.progressive_grapple)
+        self.editor.progressive_launcher_check.setChecked(major_configuration.progressive_launcher)
+        self.editor.split_ammo_check.setChecked(layout.split_beam_ammo)
 
         _update_elements_for_progressive_item(
             self._boxes_for_category[ItemCategory.SUIT][2],
@@ -136,11 +152,11 @@ class ItemPoolTab:
             _update_ammo_visibility(self._ammo_pickup_widgets[item], layout.split_beam_ammo)
 
         # Randomization Mode
-        set_combo_with_value(self.randomization_mode_combo, options.randomization_mode)
+        set_combo_with_value(self.editor.randomization_mode_combo, layout.randomization_mode)
 
         # Random Starting Items
-        self.presets_window.minimum_starting_spinbox.setValue(major_configuration.minimum_random_starting_items)
-        self.presets_window.maximum_starting_spinbox.setValue(major_configuration.maximum_random_starting_items)
+        self.editor.minimum_starting_spinbox.setValue(major_configuration.minimum_random_starting_items)
+        self.editor.maximum_starting_spinbox.setValue(major_configuration.maximum_random_starting_items)
 
         # Energy Tank
         energy_tank_state = major_configuration.items_state[self._energy_tank_item]
@@ -150,7 +166,7 @@ class ItemPoolTab:
 
         # Ammo
         ammo_provided = major_configuration.calculate_provided_ammo()
-        ammo_configuration = options.ammo_configuration
+        ammo_configuration = layout.ammo_configuration
 
         for ammo_item, maximum in ammo_configuration.maximum_ammo.items():
             for spinbox in self._ammo_maximum_spinboxes[ammo_item]:
@@ -218,11 +234,11 @@ class ItemPoolTab:
                 self._ammo_pickup_widgets[ammo][1].setText(str(invalid_config))
 
         # Item pool count
-        self.presets_window.item_pool_count_label.setText(
+        self.editor.item_pool_count_label.setText(
             "Items in pool: {}/119".format(
                 sum(state.num_shuffled_pickups for state in major_configuration.items_state.values())
                 + sum(state.pickup_count for state in ammo_configuration.items_state.values())
-                + 9 # Dark Agon, Dark Torvus, and Ing Hive keys
+                + 9  # Dark Agon, Dark Torvus, and Ing Hive keys
                 + layout.sky_temple_keys.num_keys
             )
         )
@@ -230,155 +246,146 @@ class ItemPoolTab:
     # Item Alternatives
 
     def _register_alternatives_events(self):
-        self.presets_window.progressive_suit_check.stateChanged.connect(
+        self.editor.progressive_suit_check.stateChanged.connect(
             self._persist_bool_major_configuration_field("progressive_suit"))
-        self.presets_window.progressive_suit_check.clicked.connect(self._change_progressive_suit)
+        self.editor.progressive_suit_check.clicked.connect(self._change_progressive_suit)
 
-        self.presets_window.progressive_grapple_check.stateChanged.connect(
+        self.editor.progressive_grapple_check.stateChanged.connect(
             self._persist_bool_major_configuration_field("progressive_grapple"))
-        self.presets_window.progressive_grapple_check.clicked.connect(self._change_progressive_grapple)
+        self.editor.progressive_grapple_check.clicked.connect(self._change_progressive_grapple)
 
-        self.presets_window.progressive_launcher_check.stateChanged.connect(
+        self.editor.progressive_launcher_check.stateChanged.connect(
             self._persist_bool_major_configuration_field("progressive_launcher"))
-        self.presets_window.progressive_launcher_check.clicked.connect(self._change_progressive_launcher)
+        self.editor.progressive_launcher_check.clicked.connect(self._change_progressive_launcher)
 
-        self.presets_window.split_ammo_check.stateChanged.connect(self._persist_bool_layout_field("split_beam_ammo"))
-        self.presets_window.split_ammo_check.clicked.connect(self._change_split_ammo)
+        self.editor.split_ammo_check.stateChanged.connect(self._persist_bool_layout_field("split_beam_ammo"))
+        self.editor.split_ammo_check.clicked.connect(self._change_split_ammo)
 
     def _persist_bool_layout_field(self, field_name: str):
         def bound(value: int):
-            with self._options as options:
-                options.set_layout_configuration_field(field_name, bool(value))
+            with self.editor as editor:
+                editor.set_layout_field(field_name, bool(value))
 
         return bound
 
     def _persist_bool_major_configuration_field(self, field_name: str):
         def bound(value: int):
-            with self._options as options:
-                kwargs = {field_name: bool(value)}
-                options.major_items_configuration = dataclasses.replace(options.major_items_configuration, **kwargs)
+            self.set_major_items_configuration(
+                dataclasses.replace(self.editor.layout_configuration.major_items_configuration,
+                                    **{field_name: bool(value)})
+            )
 
         return bound
 
     def _change_progressive_suit(self, has_progressive: bool):
-        with self._options as options:
-            major_configuration = options.major_items_configuration
+        if has_progressive:
+            dark_suit_state = MajorItemState()
+            light_suit_state = MajorItemState()
+            progressive_suit_state = MajorItemState(num_shuffled_pickups=2)
+        else:
+            dark_suit_state = MajorItemState(num_shuffled_pickups=1)
+            light_suit_state = MajorItemState(num_shuffled_pickups=1)
+            progressive_suit_state = MajorItemState()
 
-            if has_progressive:
-                dark_suit_state = MajorItemState()
-                light_suit_state = MajorItemState()
-                progressive_suit_state = MajorItemState(num_shuffled_pickups=2)
-            else:
-                dark_suit_state = MajorItemState(num_shuffled_pickups=1)
-                light_suit_state = MajorItemState(num_shuffled_pickups=1)
-                progressive_suit_state = MajorItemState()
+        major_configuration = self.major_items_configuration.replace_states({
+            self._dark_suit: dark_suit_state,
+            self._light_suit: light_suit_state,
+            self._progressive_suit: progressive_suit_state,
+        })
 
-            major_configuration = major_configuration.replace_states({
-                self._dark_suit: dark_suit_state,
-                self._light_suit: light_suit_state,
-                self._progressive_suit: progressive_suit_state,
-            })
-
-            options.major_items_configuration = major_configuration
+        self.set_major_items_configuration(major_configuration)
 
     def _change_progressive_grapple(self, has_progressive: bool):
-        with self._options as options:
-            major_configuration = options.major_items_configuration
+        if has_progressive:
+            grapple_state = MajorItemState()
+            screw_state = MajorItemState()
+            progressive_state = MajorItemState(num_shuffled_pickups=2)
+        else:
+            grapple_state = MajorItemState(num_shuffled_pickups=1)
+            screw_state = MajorItemState(num_shuffled_pickups=1)
+            progressive_state = MajorItemState()
 
-            if has_progressive:
-                grapple_state = MajorItemState()
-                screw_state = MajorItemState()
-                progressive_state = MajorItemState(num_shuffled_pickups=2)
-            else:
-                grapple_state = MajorItemState(num_shuffled_pickups=1)
-                screw_state = MajorItemState(num_shuffled_pickups=1)
-                progressive_state = MajorItemState()
+        major_configuration = self.major_items_configuration.replace_states({
+            self._grapple_beam: grapple_state,
+            self._screw_attack: screw_state,
+            self._progressive_grapple: progressive_state,
+        })
 
-            major_configuration = major_configuration.replace_states({
-                self._grapple_beam: grapple_state,
-                self._screw_attack: screw_state,
-                self._progressive_grapple: progressive_state,
-            })
-
-            options.major_items_configuration = major_configuration
+        self.set_major_items_configuration(major_configuration)
 
     def _change_progressive_launcher(self, has_progressive: bool):
-        with self._options as options:
-            major_configuration = options.major_items_configuration
+        major_configuration = self.major_items_configuration
 
-            # Progressive launcher is added twice to the list so it's value is doubled.
-            total = sum(major_configuration.items_state[item].included_ammo[0]
-                        for item in [self._missile_launcher, self._seeker_launcher,
-                                     self._progressive_launcher, self._progressive_launcher]) // 2
+        # Progressive launcher is added twice to the list so it's value is doubled.
+        total = sum(major_configuration.items_state[item].included_ammo[0]
+                    for item in [self._missile_launcher, self._seeker_launcher,
+                                 self._progressive_launcher, self._progressive_launcher]) // 2
 
-            if has_progressive:
-                launcher_state = MajorItemState(included_ammo=(0,))
-                seekers_state = MajorItemState(included_ammo=(0,))
-                progressive_state = MajorItemState(num_shuffled_pickups=2, included_ammo=(total,))
-            else:
-                launcher_state = MajorItemState(num_shuffled_pickups=1, included_ammo=(total,))
-                seekers_state = MajorItemState(num_shuffled_pickups=1, included_ammo=(total,))
-                progressive_state = MajorItemState(included_ammo=(0,))
+        if has_progressive:
+            launcher_state = MajorItemState(included_ammo=(0,))
+            seekers_state = MajorItemState(included_ammo=(0,))
+            progressive_state = MajorItemState(num_shuffled_pickups=2, included_ammo=(total,))
+        else:
+            launcher_state = MajorItemState(num_shuffled_pickups=1, included_ammo=(total,))
+            seekers_state = MajorItemState(num_shuffled_pickups=1, included_ammo=(total,))
+            progressive_state = MajorItemState(included_ammo=(0,))
 
-            major_configuration = major_configuration.replace_states({
-                self._missile_launcher: launcher_state,
-                self._seeker_launcher: seekers_state,
-                self._progressive_launcher: progressive_state,
-            })
+        major_configuration = major_configuration.replace_states({
+            self._missile_launcher: launcher_state,
+            self._seeker_launcher: seekers_state,
+            self._progressive_launcher: progressive_state,
+        })
 
-            options.major_items_configuration = major_configuration
+        self.set_major_items_configuration(major_configuration)
 
     def _change_split_ammo(self, has_split: bool):
-        with self._options as options:
-            ammo_configuration = options.ammo_configuration
+        ammo_configuration = self.ammo_configuration
 
-            current_total = sum(
-                ammo_configuration.items_state[ammo].pickup_count
-                for ammo in (self._dark_ammo_item, self._light_ammo_item, self._beam_ammo_item)
-            )
-            if has_split:
-                dark_ammo_state = AmmoState(pickup_count=current_total // 2)
-                light_ammo_state = AmmoState(pickup_count=current_total // 2)
-                beam_ammo_state = AmmoState()
-            else:
-                dark_ammo_state = AmmoState()
-                light_ammo_state = AmmoState()
-                beam_ammo_state = AmmoState(pickup_count=current_total)
+        current_total = sum(
+            ammo_configuration.items_state[ammo].pickup_count
+            for ammo in (self._dark_ammo_item, self._light_ammo_item, self._beam_ammo_item)
+        )
+        if has_split:
+            dark_ammo_state = AmmoState(pickup_count=current_total // 2)
+            light_ammo_state = AmmoState(pickup_count=current_total // 2)
+            beam_ammo_state = AmmoState()
+        else:
+            dark_ammo_state = AmmoState()
+            light_ammo_state = AmmoState()
+            beam_ammo_state = AmmoState(pickup_count=current_total)
 
-            ammo_configuration = ammo_configuration.replace_states({
-                self._dark_ammo_item: dark_ammo_state,
-                self._light_ammo_item: light_ammo_state,
-                self._beam_ammo_item: beam_ammo_state,
-            })
+        ammo_configuration = ammo_configuration.replace_states({
+            self._dark_ammo_item: dark_ammo_state,
+            self._light_ammo_item: light_ammo_state,
+            self._beam_ammo_item: beam_ammo_state,
+        })
 
-            options.ammo_configuration = ammo_configuration
+        self.set_ammo_configuration(ammo_configuration)
 
     # Randomization Mode
 
     def _setup_randomization_mode_combo(self):
-        self.randomization_mode_combo.setItemData(0, RandomizationMode.FULL)
-        self.randomization_mode_combo.setItemData(1, RandomizationMode.MAJOR_MINOR_SPLIT)
-        self.randomization_mode_combo.currentIndexChanged.connect(self._on_update_randomization_mode)
+        self.editor.randomization_mode_combo.setItemData(0, RandomizationMode.FULL)
+        self.editor.randomization_mode_combo.setItemData(1, RandomizationMode.MAJOR_MINOR_SPLIT)
+        self.editor.randomization_mode_combo.currentIndexChanged.connect(self._on_update_randomization_mode)
 
     def _on_update_randomization_mode(self):
-        with self._options as options:
-            options.randomization_mode = self.randomization_mode_combo.currentData()
+        with self.editor as editor:
+            editor.set_layout_field("randomization_mode", self.editor.randomization_mode_combo.currentData())
 
     # Random Starting
 
     def _register_random_starting_events(self):
-        self.presets_window.minimum_starting_spinbox.valueChanged.connect(self._on_update_minimum_starting)
-        self.presets_window.maximum_starting_spinbox.valueChanged.connect(self._on_update_maximum_starting)
+        self.editor.minimum_starting_spinbox.valueChanged.connect(self._on_update_minimum_starting)
+        self.editor.maximum_starting_spinbox.valueChanged.connect(self._on_update_maximum_starting)
 
     def _on_update_minimum_starting(self, value: int):
-        with self._options as options:
-            options.major_items_configuration = dataclasses.replace(options.major_items_configuration,
-                                                                    minimum_random_starting_items=value)
+        self.set_major_items_configuration(dataclasses.replace(self.major_items_configuration,
+                                                               minimum_random_starting_items=value))
 
     def _on_update_maximum_starting(self, value: int):
-        with self._options as options:
-            options.major_items_configuration = dataclasses.replace(options.major_items_configuration,
-                                                                    maximum_random_starting_items=value)
+        self.set_major_items_configuration(dataclasses.replace(self.major_items_configuration,
+                                                               maximum_random_starting_items=value))
 
     # Major Items
 
@@ -390,24 +397,24 @@ class ItemPoolTab:
             if not major_item_category.is_major_category and major_item_category != ItemCategory.ENERGY_TANK:
                 continue
 
-            category_button = QToolButton(self.presets_window.major_items_box)
+            category_button = QToolButton(self.editor.major_items_box)
             category_button.setGeometry(QRect(20, 30, 24, 21))
             category_button.setText("+")
 
-            category_label = QLabel(self.presets_window.major_items_box)
+            category_label = QLabel(self.editor.major_items_box)
             category_label.setSizePolicy(size_policy)
             category_label.setText(major_item_category.long_name)
 
-            category_box = QGroupBox(self.presets_window.major_items_box)
+            category_box = QGroupBox(self.editor.major_items_box)
             category_box.setSizePolicy(size_policy)
             category_box.setObjectName(f"category_box {major_item_category}")
 
             category_layout = QGridLayout(category_box)
             category_layout.setObjectName(f"category_layout {major_item_category}")
 
-            self.presets_window.major_items_layout.addWidget(category_button, 2 * current_row + 1, 0, 1, 1)
-            self.presets_window.major_items_layout.addWidget(category_label, 2 * current_row + 1, 1, 1, 1)
-            self.presets_window.major_items_layout.addWidget(category_box, 2 * current_row + 2, 0, 1, 2)
+            self.editor.major_items_layout.addWidget(category_button, 2 * current_row + 1, 0, 1, 1)
+            self.editor.major_items_layout.addWidget(category_label, 2 * current_row + 1, 1, 1, 1)
+            self.editor.major_items_layout.addWidget(category_box, 2 * current_row + 2, 0, 1, 2)
             self._boxes_for_category[major_item_category] = category_box, category_layout, {}
 
             category_button.clicked.connect(partial(_toggle_box_visibility, category_button, category_box))
@@ -440,16 +447,15 @@ class ItemPoolTab:
         :param item:
         :return:
         """
-        major_items_configuration = self._options.major_items_configuration
+        major_items_configuration = self.major_items_configuration
 
-        popup = ItemConfigurationPopup(self.parent, item, major_items_configuration.items_state[item])
+        popup = ItemConfigurationPopup(self.editor.parent, item, major_items_configuration.items_state[item])
         result = popup.exec_()
 
         if result == QDialog.Accepted:
-            with self._options:
-                self._options.major_items_configuration = major_items_configuration.replace_state_for_item(
-                    item, popup.state
-                )
+            self.set_major_items_configuration(major_items_configuration.replace_state_for_item(
+                item, popup.state
+            ))
 
     # Energy Tank
 
@@ -475,22 +481,20 @@ class ItemPoolTab:
         category_layout.addWidget(self.energy_tank_shuffled_spinbox, 1, 1)
 
     def _on_update_starting_energy_tank(self, value: int):
-        with self._options as options:
-            major_configuration = options.major_items_configuration
-            options.major_items_configuration = major_configuration.replace_state_for_item(
-                self._energy_tank_item,
-                dataclasses.replace(major_configuration.items_state[self._energy_tank_item],
-                                    num_included_in_starting_items=value)
-            )
+        major_configuration = self.major_items_configuration
+        self.set_major_items_configuration(major_configuration.replace_state_for_item(
+            self._energy_tank_item,
+            dataclasses.replace(major_configuration.items_state[self._energy_tank_item],
+                                num_included_in_starting_items=value)
+        ))
 
     def _on_update_shuffled_energy_tank(self, value: int):
-        with self._options as options:
-            major_configuration = options.major_items_configuration
-            options.major_items_configuration = major_configuration.replace_state_for_item(
-                self._energy_tank_item,
-                dataclasses.replace(major_configuration.items_state[self._energy_tank_item],
-                                    num_shuffled_pickups=value)
-            )
+        major_configuration = self.major_items_configuration
+        self.set_major_items_configuration(major_configuration.replace_state_for_item(
+            self._energy_tank_item,
+            dataclasses.replace(major_configuration.items_state[self._energy_tank_item],
+                                num_shuffled_pickups=value)
+        ))
 
     # Ammo
 
@@ -510,17 +514,17 @@ class ItemPoolTab:
             title_layout = QHBoxLayout()
             title_layout.setObjectName(f"{ammo.name} Title Horizontal Layout")
 
-            expand_ammo_button = QToolButton(self.presets_window.ammo_box)
+            expand_ammo_button = QToolButton(self.editor.ammo_box)
             expand_ammo_button.setGeometry(QRect(20, 30, 24, 21))
             expand_ammo_button.setText("+")
             title_layout.addWidget(expand_ammo_button)
 
-            category_label = QLabel(self.presets_window.ammo_box)
+            category_label = QLabel(self.editor.ammo_box)
             category_label.setSizePolicy(size_policy)
             category_label.setText(ammo.name + "s")
             title_layout.addWidget(category_label)
 
-            pickup_box = QGroupBox(self.presets_window.ammo_box)
+            pickup_box = QGroupBox(self.editor.ammo_box)
             pickup_box.setSizePolicy(size_policy)
             layout = QGridLayout(pickup_box)
             layout.setObjectName(f"{ammo.name} Box Layout")
@@ -576,27 +580,22 @@ class ItemPoolTab:
             expand_ammo_button.clicked.connect(partial(_toggle_box_visibility, expand_ammo_button, pickup_box))
             pickup_box.setVisible(False)
 
-            self.presets_window.ammo_layout.addLayout(title_layout)
-            self.presets_window.ammo_layout.addWidget(pickup_box)
+            self.editor.ammo_layout.addLayout(title_layout)
+            self.editor.ammo_layout.addWidget(pickup_box)
 
     def _on_update_ammo_maximum_spinbox(self, ammo_int: int, value: int):
-        with self._options as options:
-            options.ammo_configuration = options.ammo_configuration.replace_maximum_for_item(
-                ammo_int, value
-            )
+        self.set_ammo_configuration(self.ammo_configuration.replace_maximum_for_item(ammo_int, value))
 
     def _on_update_ammo_pickup_spinbox(self, ammo: Ammo, value: int):
-        with self._options as options:
-            ammo_configuration = options.ammo_configuration
-            options.ammo_configuration = ammo_configuration.replace_state_for_ammo(
-                ammo,
-                dataclasses.replace(ammo_configuration.items_state[ammo], pickup_count=value)
-            )
+        ammo_configuration = self.ammo_configuration
+        self.set_ammo_configuration(ammo_configuration.replace_state_for_ammo(
+            ammo,
+            dataclasses.replace(ammo_configuration.items_state[ammo], pickup_count=value)
+        ))
 
     def _on_update_ammo_require_major_item(self, ammo: Ammo, value: int):
-        with self._options as options:
-            ammo_configuration = options.ammo_configuration
-            options.ammo_configuration = ammo_configuration.replace_state_for_ammo(
-                ammo,
-                dataclasses.replace(ammo_configuration.items_state[ammo], requires_major_item=bool(value))
-            )
+        ammo_configuration = self.ammo_configuration
+        self.set_ammo_configuration(ammo_configuration.replace_state_for_ammo(
+            ammo,
+            dataclasses.replace(ammo_configuration.items_state[ammo], requires_major_item=bool(value))
+        ))

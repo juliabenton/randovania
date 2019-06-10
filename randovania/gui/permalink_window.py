@@ -6,21 +6,21 @@ from PySide2.QtWidgets import QMainWindow, QMessageBox
 from randovania.gui.generated.permalink_window_ui import Ui_PermalinkWindow
 from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
 from randovania.gui.lib.tab_service import TabService
+from randovania.gui.main_window_base_tab import MainWindowBaseTab
 from randovania.gui.options_preset.options_preset_window import OptionsPresetWindow
-from randovania.interface_common.options import Options
+from randovania.interface_common.options_preset import OptionsPreset
+from randovania.layout.layout_configuration import LayoutConfiguration
+from randovania.layout.patcher_configuration import PatcherConfiguration
 from randovania.layout.permalink import Permalink
 
 
-class PermalinkWindow(QMainWindow, Ui_PermalinkWindow):
+class PermalinkWindow(QMainWindow, Ui_PermalinkWindow, MainWindowBaseTab):
     tab_service: TabService
-    _options: Options
 
-    def __init__(self, tab_service: TabService, background_processor: BackgroundTaskMixin, options: Options):
+    def __init__(self, tab_service: TabService, background_processor: BackgroundTaskMixin):
         super().__init__()
         self.setupUi(self)
         self.tab_service = tab_service
-
-        self._options = options
 
         # Seed/Permalink
         self.seed_number_edit.setValidator(QIntValidator(0, 2 ** 31 - 1))
@@ -38,25 +38,26 @@ class PermalinkWindow(QMainWindow, Ui_PermalinkWindow):
 
     def _persist_option_then_notify(self, attribute_name: str):
         def persist(value: int):
-            with self._options as options:
-                setattr(options, attribute_name, bool(value))
+            with self.user_preferences as user_preferences:
+                user_preferences.edit_field(attribute_name, bool(value))
 
         return persist
 
-    def on_options_changed(self, options: Options):
-        seed_number = options.seed_number
+    def on_user_preferences_changed(self):
+        seed_number = self.user_preferences.seed_number
         if seed_number is not None:
             self.seed_number_edit.setText(str(seed_number))
         else:
             self.seed_number_edit.setText("")
 
-        self.create_spoiler_check.setChecked(options.create_spoiler)
+        self.create_spoiler_check.setChecked(self.user_preferences.create_spoiler)
 
-        permalink = options.permalink
-        if permalink is not None:
-            self.permalink_edit.setText(permalink.as_str)
-        else:
-            self.permalink_edit.setText("")
+        # TODO
+        # permalink = options.permalink
+        # if permalink is not None:
+        #     self.permalink_edit.setText(permalink.as_str)
+        # else:
+        #     self.permalink_edit.setText("")
 
     # Seed Number / Permalink
     def _on_new_seed_number(self, value: str):
@@ -65,8 +66,8 @@ class PermalinkWindow(QMainWindow, Ui_PermalinkWindow):
         except ValueError:
             seed = None
 
-        with self._options as options:
-            options.seed_number = seed
+        with self.user_preferences as user_preferences:
+            user_preferences.seed_number = seed
 
     def _generate_new_seed_number(self):
         self.seed_number_edit.setText(str(random.randint(0, 2 ** 31)))
@@ -98,6 +99,18 @@ class PermalinkWindow(QMainWindow, Ui_PermalinkWindow):
             options.reset_to_defaults()
 
     # Presets
+
+    @property
+    def currently_selected_options_preset(self) -> OptionsPreset:
+        return OptionsPreset(
+            "lol",
+            "DESCRIPTION",
+            None,
+            PatcherConfiguration(),
+            LayoutConfiguration.default(),
+        )
+
     def open_preset_window(self):
-        preset_window = OptionsPresetWindow(self.tab_service, self._options)
+        preset_window = OptionsPresetWindow(self.tab_service)
+        preset_window.change_preset(self.currently_selected_options_preset)
         preset_window.show()

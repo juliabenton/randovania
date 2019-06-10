@@ -6,20 +6,20 @@ from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 
 from randovania.games.prime.iso_packager import unpack_iso, pack_iso
+from randovania.gui.common_qt_lib import prompt_user_for_input_iso, prompt_user_for_seed_log
 from randovania.gui.generated.iso_management_window_ui import Ui_ISOManagementWindow
 from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
-from randovania.gui.common_qt_lib import prompt_user_for_input_iso, prompt_user_for_seed_log
 from randovania.gui.lib.tab_service import TabService
+from randovania.gui.main_window_base_tab import MainWindowBaseTab
 from randovania.interface_common import simplified_patcher, game_workdir
-from randovania.interface_common.options import Options
+from randovania.interface_common.data_paths import get_default_paths
 from randovania.interface_common.status_update_lib import ProgressUpdateCallable
 from randovania.layout.layout_description import LayoutDescription
 from randovania.resolver.exceptions import GenerationFailure
 
 
-class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
+class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow, MainWindowBaseTab):
     tab_service: TabService
-    _options: Options
     _has_game: bool
     _current_lock_state: bool = True
     _last_generated_layout: Optional[LayoutDescription] = None
@@ -27,13 +27,11 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
     loaded_game_updated = Signal()
     failed_to_generate_signal = Signal(GenerationFailure)
 
-    def __init__(self, tab_service: TabService, background_processor: BackgroundTaskMixin, options: Options):
+    def __init__(self, tab_service: TabService, background_processor: BackgroundTaskMixin):
         super().__init__()
         self.setupUi(self)
         self.tab_service = tab_service
         self.background_processor = background_processor
-
-        self._options = options
 
         # Progress
         background_processor.background_tasks_button_lock_signal.connect(self.enable_buttons_with_background_tasks)
@@ -62,15 +60,8 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
         self._refresh_game_buttons_state()
         self._refresh_randomize_button_state()
 
-    def _persist_option_then_notify(self, attribute_name: str):
-        def persist(value: int):
-            with self._options as options:
-                setattr(options, attribute_name, bool(value))
-
-        return persist
-
-    def on_options_changed(self, options: Options):
-        output_directory = options.output_directory
+    def on_user_preferences_changed(self):
+        output_directory = self.user_preferences.output_directory
         self.output_folder_edit.setText(str(output_directory) if output_directory is not None else "")
         self._refresh_randomize_button_state()
 
@@ -81,7 +72,7 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
             raise ValueError("No game available. Please load one using 'Load Game'")
 
     def _check_has_output_directory(self):
-        output_directory = self._options.output_directory
+        output_directory = self.user_preferences.output_directory
 
         if output_directory is None:
             raise ValueError("No output directory. Please select one using 'Select Folder'")
@@ -96,12 +87,12 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
             raise ValueError("Unable to use '{}' as directory: {}".format(output_directory, error))
 
     def _check_seed_number_exists(self):
-        if self._options.seed_number is None:
+        if self.user_preferences.seed_number is None:
             raise ValueError("No seed number. Please write one or press 'New seed'")
 
     # ISO Packing
     def load_game(self, iso: Path):
-        game_files_path = self._options.game_files_path
+        game_files_path = get_default_paths().game_files_path
 
         def work(progress_update: ProgressUpdateCallable):
             unpack_iso(
@@ -128,7 +119,7 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
             return
 
         iso, extension = open_result
-        game_files_path = self._options.game_files_path
+        game_files_path = get_default_paths().game_files_path
 
         def work(progress_update: ProgressUpdateCallable):
             pack_iso(
@@ -142,8 +133,8 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
     def _on_new_output_directory(self, output_folder: str):
         output_folder = Path(output_folder)
 
-        with self._options as options:
-            options.output_directory = output_folder
+        with self.user_preferences as user_preferences:
+            user_preferences.output_directory = output_folder
 
     def _change_output_folder(self):
         folder = QFileDialog.getExistingDirectory(self)
@@ -153,7 +144,7 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
         self.output_folder_edit.setText(folder)
 
     def _update_displayed_game(self):
-        result = game_workdir.discover_game(self._options.game_files_path)
+        result = game_workdir.discover_game(get_default_paths().game_files_path)
 
         if result is None:
             self._has_game = False
@@ -176,7 +167,7 @@ class ISOManagementWindow(QMainWindow, Ui_ISOManagementWindow):
     # Randomize
     def _refresh_randomize_button_state(self):
         self.randomize_and_export_button.setEnabled(self._current_lock_state)
-        self.randomize_log_only_button.setEnabled(self._current_lock_state and self._options.create_spoiler)
+        self.randomize_log_only_button.setEnabled(self._current_lock_state and self.user_preferences.create_spoiler)
         self.create_from_log_button.setEnabled(self._current_lock_state)
 
     def _background_exporter(self, job,

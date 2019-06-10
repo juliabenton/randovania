@@ -3,17 +3,16 @@ import functools
 from typing import Dict
 
 from PySide2 import QtCore, QtWidgets
-from PySide2.QtWidgets import QComboBox, QWidget
 
 from randovania.game_description import default_database
 from randovania.game_description.resources.resource_type import ResourceType
 from randovania.game_description.resources.simple_resource_info import SimpleResourceInfo
-from randovania.game_description.resources.translator_gate import TranslatorGate
 from randovania.game_description.world_list import WorldList
 from randovania.gui.common_qt_lib import set_combo_with_value
-from randovania.gui.generated.options_preset_window_ui import Ui_OptionsPresetWindow
+from randovania.gui.options_preset.options_preset_base_tab import OptionsPresetBaseTab
+from randovania.gui.options_preset.options_preset_editor import OptionsPresetEditor
 from randovania.gui.trick_details_popup import TrickDetailsPopup
-from randovania.interface_common.options import Options
+from randovania.interface_common.options_preset import OptionsPreset
 from randovania.layout.trick_level import LayoutTrickLevel, TrickLevelConfiguration
 
 _TRICK_LEVEL_DESCRIPTION = {
@@ -73,24 +72,16 @@ def _get_trick_level_description(trick_level: LayoutTrickLevel) -> str:
     )
 
 
-class TrickLevelTab:
-    parent: QWidget
-    presets_window: Ui_OptionsPresetWindow
-    _options: Options
+class TrickLevelTab(OptionsPresetBaseTab):
+    editor: OptionsPresetEditor
 
     _checkbox_for_trick: Dict[SimpleResourceInfo, QtWidgets.QCheckBox]
     _slider_for_trick: Dict[SimpleResourceInfo, QtWidgets.QSlider]
     world_list: WorldList
+    trick_difficulties_layout: QtWidgets.QGridLayout
 
-    def __init__(self,
-                 parent: QWidget,
-                 presets_window: Ui_OptionsPresetWindow,
-                 options: Options,
-                 main_window
-                 ):
-        self.parent = parent
-        self.presets_window = presets_window
-        self._options = options
+    def __init__(self, editor: OptionsPresetEditor, main_window):
+        self.editor = editor
 
         self._main_window = main_window
 
@@ -102,16 +93,16 @@ class TrickLevelTab:
         self.setup_trick_level_elements()
 
         # Alignment
-        self.presets_window.trick_level_layout.setAlignment(QtCore.Qt.AlignTop)
+        self.editor.trick_level_layout.setAlignment(QtCore.Qt.AlignTop)
 
     # Options
-    def on_options_changed(self, options: Options):
+    def on_preset_changed(self, preset: OptionsPreset):
         # Trick Level
-        trick_level_configuration = options.layout_configuration.trick_level_configuration
+        trick_level_configuration = preset.layout.trick_level_configuration
         trick_level = trick_level_configuration.global_level
 
-        set_combo_with_value(self.presets_window.logic_combo_box, trick_level)
-        self.presets_window.logic_level_label.setText(_get_trick_level_description(trick_level))
+        set_combo_with_value(self.editor.logic_combo_box, trick_level)
+        self.editor.logic_level_label.setText(_get_trick_level_description(trick_level))
 
         for (trick, checkbox), slider in zip(self._checkbox_for_trick.items(), self._slider_for_trick.values()):
             assert self._slider_for_trick[trick] is slider
@@ -127,7 +118,7 @@ class TrickLevelTab:
     def _create_difficulty_details_row(self):
         row = 1
 
-        trick_label = QtWidgets.QLabel(self.presets_window.trick_level_scroll_contents)
+        trick_label = QtWidgets.QLabel(self.editor.trick_level_scroll_contents)
         trick_label.setWordWrap(True)
         trick_label.setFixedWidth(80)
         trick_label.setText("Difficulty Details")
@@ -141,7 +132,7 @@ class TrickLevelTab:
 
         for i, trick_level in enumerate(LayoutTrickLevel):
             if trick_level not in {LayoutTrickLevel.NO_TRICKS, LayoutTrickLevel.MINIMAL_RESTRICTIONS}:
-                tool_button = QtWidgets.QToolButton(self.presets_window.trick_level_scroll_contents)
+                tool_button = QtWidgets.QToolButton(self.editor.trick_level_scroll_contents)
                 tool_button.setText(trick_level.long_name)
                 tool_button.clicked.connect(functools.partial(self._open_difficulty_details_popup, trick_level))
 
@@ -152,9 +143,9 @@ class TrickLevelTab:
     def setup_trick_level_elements(self):
         # logic_combo_box
         for i, trick_level in enumerate(LayoutTrickLevel):
-            self.presets_window.logic_combo_box.setItemData(i, trick_level)
+            self.editor.logic_combo_box.setItemData(i, trick_level)
 
-        self.presets_window.logic_combo_box.currentIndexChanged.connect(self._on_trick_level_changed)
+        self.editor.logic_combo_box.currentIndexChanged.connect(self._on_trick_level_changed)
 
         self.trick_difficulties_layout = QtWidgets.QGridLayout()
         self._checkbox_for_trick = {}
@@ -177,13 +168,13 @@ class TrickLevelTab:
                                                                              QtWidgets.QSizePolicy.Minimum,
                                                                              QtWidgets.QSizePolicy.Expanding))
 
-            trick_configurable = QtWidgets.QCheckBox(self.presets_window.trick_level_scroll_contents)
+            trick_configurable = QtWidgets.QCheckBox(self.editor.trick_level_scroll_contents)
             trick_configurable.setFixedWidth(16)
             trick_configurable.stateChanged.connect(functools.partial(self._on_check_trick_configurable, trick))
             self._checkbox_for_trick[trick] = trick_configurable
             self.trick_difficulties_layout.addWidget(trick_configurable, row, 0, 1, 1)
 
-            trick_label = QtWidgets.QLabel(self.presets_window.trick_level_scroll_contents)
+            trick_label = QtWidgets.QLabel(self.editor.trick_level_scroll_contents)
             trick_label.setSizePolicy(size_policy)
             trick_label.setWordWrap(True)
             trick_label.setFixedWidth(80)
@@ -196,7 +187,7 @@ class TrickLevelTab:
             for i in range(12):
                 slider_layout.setColumnStretch(i, 1)
 
-            horizontal_slider = QtWidgets.QSlider(self.presets_window.trick_level_scroll_contents)
+            horizontal_slider = QtWidgets.QSlider(self.editor.trick_level_scroll_contents)
             horizontal_slider.setMaximum(5)
             horizontal_slider.setPageStep(2)
             horizontal_slider.setOrientation(QtCore.Qt.Horizontal)
@@ -209,7 +200,7 @@ class TrickLevelTab:
             difficulties_for_trick = _difficulties_for_trick(self.world_list, trick)
             for i, trick_level in enumerate(LayoutTrickLevel):
                 if trick_level == LayoutTrickLevel.NO_TRICKS or trick_level in difficulties_for_trick:
-                    difficulty_label = QtWidgets.QLabel(self.presets_window.trick_level_scroll_contents)
+                    difficulty_label = QtWidgets.QLabel(self.editor.trick_level_scroll_contents)
                     difficulty_label.setAlignment(QtCore.Qt.AlignHCenter)
                     difficulty_label.setText(trick_level.long_name)
 
@@ -217,45 +208,45 @@ class TrickLevelTab:
 
             self.trick_difficulties_layout.addLayout(slider_layout, row, 2, 1, 1)
 
-            tool_button = QtWidgets.QToolButton(self.presets_window.trick_level_scroll_contents)
+            tool_button = QtWidgets.QToolButton(self.editor.trick_level_scroll_contents)
             tool_button.setText("?")
             tool_button.clicked.connect(functools.partial(self._open_trick_details_popup, trick))
             self.trick_difficulties_layout.addWidget(tool_button, row, 3, 1, 1)
 
             row += 1
 
-        self.presets_window.trick_level_layout.addLayout(self.trick_difficulties_layout)
+        self.editor.trick_level_layout.addLayout(self.trick_difficulties_layout)
 
     def _on_check_trick_configurable(self, trick: SimpleResourceInfo, enabled: int):
         enabled = bool(enabled)
 
-        with self._options as options:
-            if options.layout_configuration.trick_level_configuration.has_specific_level_for_trick(trick) != enabled:
-                options.set_layout_configuration_field(
+        with self.editor as editor:
+            if editor.layout_configuration.trick_level_configuration.has_specific_level_for_trick(trick) != enabled:
+                editor.set_layout_field(
                     "trick_level_configuration",
-                    options.layout_configuration.trick_level_configuration.set_level_for_trick(
+                    editor.layout_configuration.trick_level_configuration.set_level_for_trick(
                         trick,
-                        self.presets_window.logic_combo_box.currentData() if enabled else None
+                        self.editor.logic_combo_box.currentData() if enabled else None
                     )
                 )
 
     def _on_slide_trick_slider(self, trick: SimpleResourceInfo, value: int):
         if self._slider_for_trick[trick].isEnabled():
-            with self._options as options:
-                options.set_layout_configuration_field(
+            with self.editor as editor:
+                editor.set_layout_field(
                     "trick_level_configuration",
-                    options.layout_configuration.trick_level_configuration.set_level_for_trick(
+                    editor.layout_configuration.trick_level_configuration.set_level_for_trick(
                         trick,
                         LayoutTrickLevel.from_number(value)
                     )
                 )
 
     def _on_trick_level_changed(self):
-        trick_level = self.presets_window.logic_combo_box.currentData()
-        with self._options as options:
-            options.set_layout_configuration_field(
+        trick_level = self.editor.logic_combo_box.currentData()
+        with self.editor as editor:
+            editor.set_layout_field(
                 "trick_level_configuration",
-                dataclasses.replace(options.layout_configuration.trick_level_configuration,
+                dataclasses.replace(editor.layout_configuration.trick_level_configuration,
                                     global_level=trick_level)
             )
 
@@ -264,7 +255,7 @@ class TrickLevelTab:
             self._main_window,
             self.game_description,
             trick,
-            self._options.layout_configuration.trick_level_configuration.level_for_trick(trick),
+            self.editor.layout_configuration.trick_level_configuration.level_for_trick(trick),
         )
         self._trick_details_popup.show()
 

@@ -24,7 +24,7 @@
     <item>
      <widget class="QTabWidget" name="tab_widget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="details_tab">
        <attribute name="title">
@@ -94,8 +94,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>502</width>
-             <height>377</height>
+             <width>492</width>
+             <height>449</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="item_pool_grid_layout">
@@ -151,19 +151,12 @@
               </layout>
              </widget>
             </item>
-            <item row="1" column="0" colspan="2">
+            <item row="2" column="0" colspan="2">
              <widget class="QGroupBox" name="random_starting_box">
               <property name="title">
                <string>Random Starting Items</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_3">
-               <item row="2" column="0">
-                <widget class="QLabel" name="maximum_starting_label">
-                 <property name="text">
-                  <string>Maximum</string>
-                 </property>
-                </widget>
-               </item>
                <item row="1" column="0">
                 <widget class="QLabel" name="minimum_starting_label">
                  <property name="text">
@@ -178,6 +171,13 @@
                 <widget class="QSpinBox" name="minimum_starting_spinbox">
                  <property name="maximum">
                   <number>30</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="maximum_starting_label">
+                 <property name="text">
+                  <string>Maximum</string>
                  </property>
                 </widget>
                </item>
@@ -201,7 +201,7 @@
               </layout>
              </widget>
             </item>
-            <item row="2" column="0" colspan="2">
+            <item row="3" column="0" colspan="2">
              <widget class="QGroupBox" name="item_pool_box">
               <property name="toolTipDuration">
                <number>-1</number>
@@ -269,6 +269,39 @@
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
                  </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <widget class="QGroupBox" name="randomization_mode_group">
+              <property name="title">
+               <string>Randomization Mode</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                <widget class="QLabel" name="randomization_mode_label">
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting controls how Randovania will shuffle items.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Full:&lt;/span&gt; All items can be placed in any location.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Major/minor split:&lt;/span&gt; Major items (i.e., major upgrades, Energy Tanks, Dark Temple Keys, and Energy Transfer Modules) and minor items (i.e, expansions) will be shuffled separately. Major items in excess of the number of major locations will be placed in minor locations, and vice versa.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="randomization_mode_combo">
+                 <item>
+                  <property name="text">
+                   <string>Full</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Major/minor split</string>
+                  </property>
+                 </item>
                 </widget>
                </item>
               </layout>
@@ -667,7 +700,7 @@
         <item>
          <widget class="QLabel" name="hint_sky_temple_key_label">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls how precise the hints for Sky Temple Keys in Sky Temple Gateway are.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;No hints&lt;/span&gt;: The scans provide no useful information.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Show only the area name&lt;/span&gt;: The scans will say the key is in &amp;quot;Temple Grounds&amp;quot;, &amp;quot;Agon Wastes&amp;quot;, etc.&lt;br/&gt;There is no difference between Aether and Dark Aether. So Agon Wastes means both light and dark world.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Show area and room name&lt;/span&gt;: The scans will say the key is in &amp;quot;Great Temple - Transport A Access&amp;quot;, etc. For rooms with more than one item, there's no way to distinguish which one it is.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This controls how precise the hints for Sky Temple Keys in Sky Temple Gateway are.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;No hints&lt;/span&gt;: The scans provide no useful information.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Show only the area name&lt;/span&gt;: Each scan says the corresponding key is in &amp;quot;Temple Grounds&amp;quot;, &amp;quot;Agon Wastes&amp;quot;, etc.&lt;br/&gt;Aether and Dark Aether are distinguished; for example, &amp;quot;Agon Wastes&amp;quot; refers only to the light world.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Show area and room name&lt;/span&gt;: Each scan says the corresponding key is in &amp;quot;Great Temple - Transport A Access&amp;quot;, &amp;quot;Ing Hive - Hive Entrance&amp;quot;, etc. For rooms with more than one item location, there's no way to distinguish which one of them that key is in.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>

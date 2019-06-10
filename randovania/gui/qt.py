@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 from PySide2 import QtCore
 from PySide2.QtWidgets import QApplication, QMessageBox
 
+from randovania.interface_common.data_paths import get_default_paths
 from randovania.interface_common.options import Options, DecodeFailedException
 
 
@@ -42,14 +43,16 @@ def load_options_from_disk(options: Options) -> bool:
 
 
 def show_main_window(app: QApplication, args):
+    from randovania.gui.main_window import MainWindow
+    main_window = MainWindow(getattr(args, "preview", False))
+    app.main_window = main_window
+
+    main_window.load_persisted_data()
     options = Options.with_default_data_dir()
 
     if not load_options_from_disk(options):
         raise SystemExit(1)
 
-    from randovania.gui.main_window import MainWindow
-    main_window = MainWindow(options, getattr(args, "preview", False))
-    app.main_window = main_window
     main_window.show()
     main_window.request_new_data()
 
@@ -69,7 +72,8 @@ def show_tracker(app: QApplication, args):
     if not load_options_from_disk(options):
         raise SystemExit(1)
 
-    app.tracker = TrackerWindow(options.tracker_files_path, options.layout_configuration)
+    app.tracker = TrackerWindow(get_default_paths().tracker_files_path,
+                                options.layout_configuration)
     app.tracker.show()
 
 

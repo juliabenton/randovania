@@ -1,76 +1,76 @@
-from PySide2.QtWidgets import QComboBox, QWidget
+from PySide2.QtWidgets import QComboBox, QWidget, QCheckBox, QDoubleSpinBox
 
+from randovania.gui.common_qt_lib import set_combo_with_value
 from randovania.gui.generated.options_preset_window_ui import Ui_OptionsPresetWindow
+from randovania.gui.options_preset.options_preset_base_tab import OptionsPresetBaseTab
+from randovania.gui.options_preset.options_preset_editor import OptionsPresetEditor
 from randovania.interface_common.options import Options
+from randovania.interface_common.options_preset import OptionsPreset
 from randovania.layout.patcher_configuration import PickupModelStyle, PickupModelDataSource
 
 
-class GamePatchesTab:
-    parent: QWidget
-    presets_window: Ui_OptionsPresetWindow
-    _options: Options
+class GamePatchesTab(OptionsPresetBaseTab):
+    editor: OptionsPresetEditor
 
-    def __init__(self, parent: QWidget, presets_window: Ui_OptionsPresetWindow, options: Options):
-        self.parent = parent
-        self.presets_window = presets_window
-        self._options = options
+    def __init__(self, editor: OptionsPresetEditor):
+        self.editor = editor
 
         # Item Data
         for i, value in enumerate(PickupModelStyle):
-            self.presets_window.pickup_model_combo.setItemData(i, value)
+            self.editor.pickup_model_combo.setItemData(i, value)
 
         for i, value in enumerate(PickupModelDataSource):
-            self.presets_window.pickup_data_source_combo.setItemData(i, value)
+            self.editor.pickup_data_source_combo.setItemData(i, value)
 
         # TODO: implement the LOCATION data source
-        self.presets_window.pickup_data_source_combo.removeItem(
-            self.presets_window.pickup_data_source_combo.findData(PickupModelDataSource.LOCATION))
+        self.editor.pickup_data_source_combo.removeItem(
+            self.editor.pickup_data_source_combo.findData(PickupModelDataSource.LOCATION))
 
         # Signals
-        self.presets_window.warp_to_start_check.stateChanged.connect(
-            self._persist_option_then_notify("warp_to_start"))
-        self.presets_window.include_menu_mod_check.stateChanged.connect(
-            self._persist_option_then_notify("include_menu_mod"))
+        self._persist_checkbox(self.editor.warp_to_start_check, "warp_to_start")
+        self._persist_checkbox(self.editor.include_menu_mod_check, "menu_mod")
+        self._persist_spin_box(self.editor.varia_suit_spin_box, "varia_suit_damage")
+        self._persist_spin_box(self.editor.dark_suit_spin_box, "dark_suit_damage")
+        self._persist_combo(self.editor.pickup_model_combo, "pickup_model_style")
+        self._persist_combo(self.editor.pickup_data_source_combo, "pickup_model_data_source")
 
-        self.presets_window.varia_suit_spin_box.valueChanged.connect(self._persist_float("varia_suit_damage"))
-        self.presets_window.dark_suit_spin_box.valueChanged.connect(self._persist_float("dark_suit_damage"))
-
-        self.presets_window.pickup_model_combo.currentIndexChanged.connect(
-            self._persist_enum(self.presets_window.pickup_model_combo, "pickup_model_style"))
-        self.presets_window.pickup_data_source_combo.currentIndexChanged.connect(
-            self._persist_enum(self.presets_window.pickup_data_source_combo, "pickup_model_data_source"))
-
-    def _persist_option_then_notify(self, attribute_name: str):
+    def _persist_bool(self, attribute_name: str):
         def persist(value: int):
-            with self._options as options:
-                setattr(options, attribute_name, bool(value))
+            with self.editor as editor:
+                editor.set_patcher_field(attribute_name, bool(value))
 
         return persist
+
+    def _persist_checkbox(self, check_box: QCheckBox, attribute_name: str):
+        check_box.stateChanged.connect(self._persist_bool(attribute_name))
 
     def _persist_float(self, attribute_name: str):
         def persist(value: float):
-            with self._options as options:
-                options.set_patcher_configuration_field(attribute_name, value)
+            with self.editor as editor:
+                editor.set_patcher_field(attribute_name, value)
 
         return persist
 
-    def _persist_enum(self, combo: QComboBox, attribute_name: str):
+    def _persist_spin_box(self, spin_box: QDoubleSpinBox, attribute_name: str):
+        spin_box.valueChanged.connect(self._persist_float(attribute_name))
+
+    def _persist_combo(self, combo: QComboBox, attribute_name: str):
         def persist(index: int):
-            with self._options as options:
-                options.set_patcher_configuration_field(attribute_name, combo.itemData(index))
+            with self.editor as editor:
+                editor.set_patcher_field(attribute_name, combo.itemData(index))
 
-        return persist
+        combo.currentIndexChanged.connect(persist)
 
-    def on_options_changed(self, options: Options):
-        self.presets_window.warp_to_start_check.setChecked(options.warp_to_start)
-        self.presets_window.include_menu_mod_check.setChecked(options.include_menu_mod)
+    def on_preset_changed(self, preset: OptionsPreset):
+        patcher = preset.patcher
 
-        self.presets_window.varia_suit_spin_box.setValue(options.patcher_configuration.varia_suit_damage)
-        self.presets_window.dark_suit_spin_box.setValue(options.patcher_configuration.dark_suit_damage)
+        self.editor.warp_to_start_check.setChecked(patcher.warp_to_start)
+        self.editor.include_menu_mod_check.setChecked(patcher.menu_mod)
 
-        self.presets_window.pickup_model_combo.setCurrentIndex(
-            self.presets_window.pickup_model_combo.findData(options.pickup_model_style))
-        self.presets_window.pickup_data_source_combo.setCurrentIndex(
-            self.presets_window.pickup_data_source_combo.findData(options.pickup_model_data_source))
-        self.presets_window.pickup_data_source_combo.setEnabled(
-            options.pickup_model_style != PickupModelStyle.ALL_VISIBLE)
+        self.editor.varia_suit_spin_box.setValue(patcher.varia_suit_damage)
+        self.editor.dark_suit_spin_box.setValue(patcher.dark_suit_damage)
+
+        set_combo_with_value(self.editor.pickup_model_combo, patcher.pickup_model_style)
+        set_combo_with_value(self.editor.pickup_data_source_combo, patcher.pickup_model_data_source)
+        self.editor.pickup_data_source_combo.setEnabled(
+            patcher.pickup_model_style != PickupModelStyle.ALL_VISIBLE)
