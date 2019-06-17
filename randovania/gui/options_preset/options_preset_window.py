@@ -30,6 +30,8 @@ class OptionsPresetWindow(QMainWindow, OptionsPresetEditor):
 
     def __init__(self, main_window: MainWindow):
         super().__init__()
+        OptionsPresetEditor.__init__(self)
+
         set_default_window_icon(self)
         self.setupUi(self)
 

@@ -112,5 +112,6 @@ class PermalinkWindow(QMainWindow, Ui_PermalinkWindow, MainWindowBaseTab):
 
     def open_preset_window(self):
         preset_window = OptionsPresetWindow(self.tab_service)
-        preset_window.change_preset(self.currently_selected_options_preset)
+        with preset_window:
+            preset_window.change_preset(self.currently_selected_options_preset)
         preset_window.show()

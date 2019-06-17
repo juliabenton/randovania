@@ -12,8 +12,8 @@ from randovania.layout.patcher_configuration import PatcherConfiguration
 class OptionsPresetEditor(EditableObject, Ui_OptionsPresetWindow):
     _options_preset: OptionsPreset
 
-    def __init__(self, preset: OptionsPreset):
-        self._options_preset = preset
+    def __init__(self):
+        self._options_preset = None
 
     @property
     def parent(self) -> QWidget:
