@@ -1,5 +1,6 @@
 import random
 
+from PySide2 import QtWidgets
 from PySide2.QtGui import QIntValidator
 from PySide2.QtWidgets import QMainWindow, QMessageBox
 
@@ -34,7 +35,12 @@ class PermalinkWindow(QMainWindow, Ui_PermalinkWindow, MainWindowBaseTab):
         self.reset_settings_button.clicked.connect(self._reset_settings)
 
         # Options preset
-        self.presets_create_button.clicked.connect(self.open_preset_window)
+        self.presets_edit_button.clicked.connect(self.open_preset_window)
+
+        self.presets_delete_action = QtWidgets.QAction("Delete", self)
+        self.presets_export_action = QtWidgets.QAction("Export", self)
+        self.presets_tool_button.addAction(self.presets_delete_action)
+        self.presets_tool_button.addAction(self.presets_export_action)
 
     def _persist_option_then_notify(self, attribute_name: str):
         def persist(value: int):

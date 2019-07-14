@@ -1,14 +1,9 @@
-import random
-from typing import List
+from typing import List, Tuple
 
-from PySide2.QtGui import QIntValidator
-from PySide2.QtWidgets import QMainWindow, QMessageBox, QWidget
+from PySide2 import QtWidgets
+from PySide2.QtWidgets import QMainWindow, QWidget
 
 from randovania.gui.common_qt_lib import set_default_window_icon
-from randovania.gui.generated.options_preset_window_ui import Ui_OptionsPresetWindow
-from randovania.gui.generated.permalink_window_ui import Ui_PermalinkWindow
-from randovania.gui.lib.background_task_mixin import BackgroundTaskMixin
-from randovania.gui.lib.tab_service import TabService
 from randovania.gui.main_window import MainWindow
 from randovania.gui.options_preset.elevator_tab import ElevatorTab
 from randovania.gui.options_preset.game_patches_tab import GamePatchesTab
@@ -20,13 +15,12 @@ from randovania.gui.options_preset.options_preset_editor import OptionsPresetEdi
 from randovania.gui.options_preset.starting_location_tab import StartingLocationTab
 from randovania.gui.options_preset.translator_gate_tab import TranslatorGateTab
 from randovania.gui.options_preset.trick_level_tab import TrickLevelTab
-from randovania.interface_common.options import Options
 from randovania.interface_common.options_preset import OptionsPreset
-from randovania.layout.permalink import Permalink
 
 
 class OptionsPresetWindow(QMainWindow, OptionsPresetEditor):
     tabs: List[OptionsPresetBaseTab]
+    _original_preset: OptionsPreset
 
     def __init__(self, main_window: MainWindow):
         super().__init__()
@@ -34,6 +28,8 @@ class OptionsPresetWindow(QMainWindow, OptionsPresetEditor):
 
         set_default_window_icon(self)
         self.setupUi(self)
+
+        self._original_preset = None
 
         self.tabs = [
             ItemPoolTab(self),
@@ -46,6 +42,10 @@ class OptionsPresetWindow(QMainWindow, OptionsPresetEditor):
             GamePatchesTab(self),
         ]
 
+        self.button_box.clicked.connect(self.button_box_clicked)
+        the_buttons: Tuple[QtWidgets.QAbstractButton, ...] = self.button_box.buttons()
+        self.save_button, self.close_button, self.reset_button = the_buttons
+
         self.on_changes = self.on_preset_changed
 
     @property
@@ -53,5 +53,47 @@ class OptionsPresetWindow(QMainWindow, OptionsPresetEditor):
         raise self
 
     def on_preset_changed(self):
+        if self._original_preset is None:
+            self._original_preset = self.options_preset
+
         for tab in self.tabs:
             tab.on_preset_changed(self.options_preset)
+
+        self.reset_button.setEnabled(self.has_unsaved_changes)
+        self.save_button.setEnabled(self.has_unsaved_changes)
+
+        self.preset_title_edit.setText(self.options_preset.name)
+        self.preset_description_edit.setText(self.options_preset.description)
+        self.preset_reference_value_label.setText(self.options_preset.reference.name
+                                                  if self.options_preset.reference is not None
+                                                  else "<Default Preset>")
+
+    def button_box_clicked(self, button: QtWidgets.QAbstractButton):
+        if button == self.close_button:
+            self.close()
+
+        elif button == self.save_button:
+            self.save_modifications()
+
+        elif button == self.reset_button:
+            with self as editor:
+                editor.change_preset(self._original_preset)
+
+    @property
+    def has_unsaved_changes(self) -> bool:
+        return self.options_preset != self._original_preset
+
+    def closeEvent(self, event):
+        if self.has_unsaved_changes:
+            response = QtWidgets.QMessageBox.question(self,
+                                                      "Discard changes?",
+                                                      "You have unsaved changes. Do you want to close anyway?")
+            if response != QtWidgets.QMessageBox.Yes:
+                event.ignore()
+                return
+
+        super().closeEvent(event)
+
+    def save_modifications(self):
+        if self.options_preset.reference is None:
+            raise RuntimeError("Attempting to save a default options preset.")

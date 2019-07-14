@@ -99,24 +99,34 @@
        <string>Options Presets</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="2" column="1">
-        <widget class="QPushButton" name="presets_create_button">
+       <item row="3" column="3">
+        <widget class="QToolButton" name="presets_tool_button">
          <property name="text">
-          <string>Create new based on this</string>
+          <string>More</string>
+         </property>
+         <property name="popupMode">
+          <enum>QToolButton::InstantPopup</enum>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonIconOnly</enum>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="presets_delete_button">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
+       <item row="3" column="2">
+        <widget class="QPushButton" name="presets_copy_button">
          <property name="text">
-          <string>Delete</string>
+          <string>Copy</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
+       <item row="3" column="1">
+        <widget class="QPushButton" name="presets_edit_button">
+         <property name="text">
+          <string>Edit</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="3">
         <widget class="QLabel" name="presets_description_label">
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The default Randovania layout.&lt;/p&gt;&lt;p&gt;This layout has been optimized to make all pickups you find valuable. The changes are:&lt;/p&gt;&lt;p&gt;* Suits are progressive: the first one you find always gives you Dark Suit and the second Light Suit.&lt;br/&gt;* Grapple Beam / Screw Attack are also progressive, since Screw Attack obsoletes Grapple Beam.&lt;br/&gt;* Missiles only work after you find Missile Launcher, and Power Bombs after the main expansion.&lt;br/&gt;* The total Missile count is 175. The remaining item slots are replaced with Beam Ammo expansions.&lt;br/&gt;* The Beam Ammo expansions are split into Light Ammo and Dark Ammo expansions, giving 20 ammo each.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -129,21 +139,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QPushButton" name="presets_import_file_button">
-         <property name="text">
-          <string>Import from file</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QPushButton" name="presets_export_file_button">
-         <property name="text">
-          <string>Export to file</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="2">
+       <item row="0" column="1" colspan="3">
         <widget class="QComboBox" name="presets_name_combo">
          <item>
           <property name="text">
