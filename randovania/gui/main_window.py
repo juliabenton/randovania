@@ -186,6 +186,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
     def load_persisted_data(self):
         self.user_preferences = UserPreferences()
 
+        # FIXME: deserialize the user preferences
+
         self.user_preferences.on_changes = self.preferences_changed_signal.emit
         with self.user_preferences:
             self.on_preferences_changed()

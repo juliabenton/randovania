@@ -1,8 +1,7 @@
 from distutils.version import StrictVersion
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
-import randovania
 from randovania.interface_common import update_checker
 from randovania.interface_common.cosmetic_patches import CosmeticPatches
 from randovania.interface_common.editable_object import EditableObject
@@ -15,6 +14,8 @@ _SERIALIZER_FOR_FIELD = {
     "create_spoiler": Serializer(identity, bool),
     "output_directory": Serializer(str, Path),
     "cosmetic_patches": Serializer(lambda p: p.as_json, CosmeticPatches.from_json_dict),
+    "selected_preset_is_custom": Serializer(identity, bool),
+    "custom_options_preset": Serializer(identity, tuple),
 }
 
 
@@ -28,6 +29,8 @@ class UserPreferences(EditableObject):
     _create_spoiler: Optional[bool] = None
     _cosmetic_patches: Optional[CosmeticPatches] = None
     _selected_options_preset: Optional[str] = None
+    _selected_preset_is_custom: bool = False
+    _custom_options_preset: Optional[Tuple[str, ...]] = None
 
     def __init__(self):
         self._last_changelog_displayed = str(update_checker.strict_current_version())
@@ -39,6 +42,8 @@ class UserPreferences(EditableObject):
         self._create_spoiler = None
         self._cosmetic_patches = None
         self._selected_options_preset = None
+        self._selected_preset_is_custom = False
+        self._custom_options_preset = None
 
     # Access to Direct fields
     @property
