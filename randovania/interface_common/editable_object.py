@@ -15,6 +15,7 @@ class EditableObject:
             if self._is_dirty:
                 if self._on_changes is not None:
                     self._on_changes()
+                self._is_dirty = False
         self._nested_edit_level -= 1
 
     # Events

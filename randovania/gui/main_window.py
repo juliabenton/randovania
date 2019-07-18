@@ -188,9 +188,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
 
         # FIXME: deserialize the user preferences
 
-        self.user_preferences.on_changes = self.preferences_changed_signal.emit
         with self.user_preferences:
             self.on_preferences_changed()
+
+        self.user_preferences.on_changes = self.preferences_changed_signal.emit
 
     def on_preferences_changed(self):
         for window in self.windows:
@@ -199,6 +200,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, TabService, BackgroundTaskMixin):
         self.menu_action_validate_seed_after.setChecked(self.user_preferences.advanced_validate_seed_after)
         self.menu_action_timeout_generation_after_a_time_limit.setChecked(
             self.user_preferences.advanced_timeout_during_generation)
+
+        # FIXME: serialize user preferences
 
     # Menu Actions
     def _open_data_visualizer(self):
