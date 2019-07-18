@@ -7,7 +7,7 @@ networkx==2.3
 bitstruct==7.1.0
 construct==2.9.45
 nod==1.1.1
-PySide2==5.12.0
+PySide2==5.13.1
 tenacity==5.1.1
 pytest==5.0.1
 pytest-cov==2.7.1
@@ -26,7 +26,7 @@ more-itertools==7.2.0
 networkx==2.3
 pluggy==0.13.0
 py==1.8.0
-shiboken2==5.12.0
+shiboken2==5.13.1
 six==1.12.0
 urllib3==1.25.6
 
