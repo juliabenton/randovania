@@ -9,6 +9,7 @@ from randovania.game_description.hint import Hint, HintType, PrecisionPair
 from randovania.game_description.item.item_category import ItemCategory
 from randovania.game_description.node import LogbookNode
 from randovania.game_description.resources.pickup_entry import PickupEntry
+from randovania.game_description.resources.pickup_index import PickupIndex
 from randovania.game_description.world_list import WorldList
 from randovania.generator.filler.retcon import retcon_playthrough_filler
 from randovania.layout.layout_configuration import LayoutConfiguration
@@ -113,13 +114,12 @@ def fill_unassigned_hints(patches: GamePatches,
                           ) -> GamePatches:
 
     new_hints = copy.copy(patches.hints)
-    possible_indices = list(patches.pickup_assignment.keys())
 
     for node in world_list.all_nodes:
         if isinstance(node, LogbookNode):
             logbook_asset = node.resource()
             if logbook_asset not in new_hints:
-                new_hints[logbook_asset] = Hint(HintType.LOCATION, None, rng.choice(possible_indices))
+                new_hints[logbook_asset] = Hint(HintType.LOCATION, PrecisionPair.joke(), PickupIndex(-1))
 
     return dataclasses.replace(patches, hints=new_hints)
 
