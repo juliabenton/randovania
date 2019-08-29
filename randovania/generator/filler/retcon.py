@@ -14,7 +14,6 @@ from randovania.game_description.resources.pickup_index import PickupIndex
 from randovania.game_description.resources.resource_info import ResourceInfo, CurrentResources
 from randovania.game_description.world_list import WorldList
 from randovania.generator.filler.filler_library import UnableToGenerate, filter_pickup_nodes
-from randovania.generator.filler.hint_placement import place_hints
 from randovania.generator.generator_reach import GeneratorReach, collectable_resource_nodes, \
     advance_reach_with_possible_unsafe_resources, reach_with_all_safe_resources, \
     get_collectable_resource_nodes_of_reach, advance_to_with_reach_copy
@@ -114,7 +113,7 @@ def retcon_playthrough_filler(game: GameDescription,
                               minimum_random_starting_items: int,
                               maximum_random_starting_items: int,
                               status_update: Callable[[str], None],
-                              ) -> GamePatches:
+                              ) -> State:
     debug.debug_print("Major items: {}".format([item.name for item in pickups_left]))
     last_message = "Starting."
 
@@ -221,7 +220,7 @@ def retcon_playthrough_filler(game: GameDescription,
     if not pickups_left:
         debug.debug_print("Finished because we have nothing else to distribute")
 
-    return place_hints(reach.state, rng, game.world_list, status_update)
+    return reach.state
 
 
 def _calculate_progression_pickups(pickups_left: Iterator[PickupEntry],
