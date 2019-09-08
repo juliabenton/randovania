@@ -251,6 +251,8 @@ class TrickLevelTab(OptionsPresetBaseTab):
             )
 
     def _open_trick_details_popup(self, trick: SimpleResourceInfo):
+        # TODO: the window parent should be self._editor, but
+        # we need self._main_window to be able to open the Data Visualizer
         self._trick_details_popup = TrickDetailsPopup(
             self._main_window,
             self.game_description,

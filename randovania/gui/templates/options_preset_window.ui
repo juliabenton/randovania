@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>530</width>
-    <height>460</height>
+    <width>725</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
     <item>
      <widget class="QTabWidget" name="tab_widget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="details_tab">
        <attribute name="title">
@@ -94,8 +94,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>492</width>
-             <height>449</height>
+             <width>666</width>
+             <height>512</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="item_pool_grid_layout">
@@ -334,8 +334,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>502</width>
-             <height>377</height>
+             <width>683</width>
+             <height>428</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="trick_level_layout">
@@ -629,8 +629,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>502</width>
-             <height>377</height>
+             <width>683</width>
+             <height>428</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="translators_layout">
@@ -963,8 +963,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>530</width>
-     <height>17</height>
+     <width>725</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>

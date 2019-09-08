@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>496</width>
+    <width>532</width>
     <height>462</height>
    </rect>
   </property>
@@ -77,8 +77,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>541</width>
-                 <height>372</height>
+                 <width>148</width>
+                 <height>1200</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -124,8 +124,8 @@ p, li { white-space: pre-wrap; }
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>531</width>
-                 <height>460</height>
+                 <width>111</width>
+                 <height>1832</height>
                 </rect>
                </property>
                <layout class="QGridLayout" name="gridLayout_5">
@@ -163,8 +163,8 @@ p, li { white-space: pre-wrap; }
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>531</width>
-                 <height>426</height>
+                 <width>125</width>
+                 <height>2536</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="differences_scroll_layout">
@@ -205,8 +205,8 @@ p, li { white-space: pre-wrap; }
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>541</width>
-                 <height>372</height>
+                 <width>98</width>
+                 <height>333</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="hint_scroll_layout_2">
@@ -253,8 +253,8 @@ p, li { white-space: pre-wrap; }
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>541</width>
-                 <height>372</height>
+                 <width>98</width>
+                 <height>486</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="hint_scroll_layout">
@@ -401,8 +401,8 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>587</width>
-     <height>17</height>
+     <width>532</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_open">
