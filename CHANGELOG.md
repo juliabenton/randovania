@@ -212,6 +212,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Changed: The generator is now more likely to fill the worlds evenly.
 
+-   Changed: Red Temple Keys are no longer given hints.
 
 ## [0.28.1] - 2019-06-14
 
