@@ -4,11 +4,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from randovania.game_description.game_patches import GamePatches
-from randovania.game_description.hint import Hint, HintType
+from randovania.game_description.hint import Hint
 from randovania.game_description.item.item_category import ItemCategory
-from randovania.game_description.node import LogbookNode
 from randovania.game_description.resources.pickup_entry import PickupEntry, ConditionalResources
-from randovania.game_description.resources.pickup_index import PickupIndex
 from randovania.generator.filler import runner
 from randovania.layout.layout_configuration import LayoutConfiguration
 
@@ -36,8 +34,6 @@ def test_run_filler(mock_retcon_playthrough_filler: MagicMock,
     status_update = MagicMock()
     item_pool = [pickup]
     patches = echoes_game_description.create_game_patches()
-
-    logbook_nodes = [node for node in echoes_game_description.world_list.all_nodes if isinstance(node, LogbookNode)]
 
     mock_retcon_playthrough_filler.return_value = patches
 
