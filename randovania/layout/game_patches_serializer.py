@@ -35,7 +35,8 @@ class BitPackPickupEntry:
 
         yield self.value.model_index, 255
         yield from self.value.item_category.bit_pack_encode({})
-        yield int(any(cond.name is not None for cond in self.value.resources)), 2
+        yield from bitpacking.encode_bool(self.value.can_get_hint)
+        yield from bitpacking.encode_bool(any(cond.name is not None for cond in self.value.resources))
         yield len(self.value.resources) - 1, MAXIMUM_PICKUP_CONDITIONAL_RESOURCES
 
         for i, conditional in enumerate(self.value.resources):
@@ -56,6 +57,7 @@ class BitPackPickupEntry:
     def bit_pack_unpack(cls, decoder: BitPackDecoder, name: str, database: ResourceDatabase) -> PickupEntry:
         model_index = decoder.decode_single(255)
         item_category = ItemCategory.bit_pack_unpack(decoder, {})
+        can_get_hint = bitpacking.decode_bool(decoder)
         has_name = bitpacking.decode_bool(decoder)
         num_conditional = decoder.decode_single(MAXIMUM_PICKUP_CONDITIONAL_RESOURCES) + 1
 
@@ -93,6 +95,7 @@ class BitPackPickupEntry:
             name=name,
             model_index=model_index,
             item_category=item_category,
+            can_get_hint=can_get_hint,
             resources=tuple(conditional_resources),
             convert_resources=tuple(convert_resources),
         )
