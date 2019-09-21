@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from randovania.game_description.game_patches import GamePatches
-from randovania.game_description.hint import Hint
 from randovania.game_description.item.item_category import ItemCategory
 from randovania.game_description.resources.pickup_entry import PickupEntry, ConditionalResources
 from randovania.generator.filler import runner
