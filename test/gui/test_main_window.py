@@ -7,10 +7,6 @@ import pytest
 from randovania.gui.main_window import MainWindow
 from randovania.interface_common.options import Options
 
-pytestmark = pytest.mark.skipif(
-    pytest.config.option.skip_gui_tests,
-    reason="skipped due to --skip-gui-tests")
-
 
 def create_window(options: Union[Options, MagicMock]) -> MainWindow:
     return MainWindow(options, False)
@@ -24,7 +20,7 @@ def _default_main_window() -> MainWindow:
 @patch("randovania.gui.iso_management_window.ISOManagementWindow.load_game", autospec=True)
 def test_drop_iso_event(mock_load_game: MagicMock,
                         default_main_window: MainWindow,
-                        qtbot,
+                        skip_qtbot,
                         ):
     # Setup
     event = MagicMock()
@@ -43,7 +39,7 @@ def test_drop_iso_event(mock_load_game: MagicMock,
 @patch("randovania.gui.iso_management_window.ISOManagementWindow.load_game", autospec=True)
 def test_drop_random_event(mock_load_game: MagicMock,
                            default_main_window: MainWindow,
-                           qtbot,
+                           skip_qtbot,
                            ):
     # Setup
     event = MagicMock()

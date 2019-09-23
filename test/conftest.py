@@ -19,7 +19,9 @@ def test_files_dir() -> Path:
 
 
 @pytest.fixture
-def echo_tool(test_files_dir) -> Path:
+def echo_tool(request, test_files_dir) -> Path:
+    if request.config.option.skip_echo_tool:
+        pytest.skip()
     return test_files_dir.joinpath("echo_tool.py")
 
 
@@ -94,4 +96,16 @@ try:
 except ImportError:
     @pytest.fixture()
     def skip_qtbot(request):
+        pytest.skip()
+
+
+@pytest.fixture()
+def skip_generation_tests(request):
+    if request.config.option.skip_generation_tests:
+        pytest.skip()
+
+
+@pytest.fixture()
+def skip_resolver_tests(request):
+    if request.config.option.skip_resolver_tests:
         pytest.skip()
